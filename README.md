@@ -10,6 +10,8 @@ Instruções
   * 2.1- Instale as ferramentas de build do Visual C++, marcando a opção indicada na foto (Conjunto de ferramentas do VC++ 2015.3)
   ![Passo 2.1](https://i.imgur.com/NejaFP3.png)
 * 3- Instale o Cargo o gerenciador de pacotes do rust https://doc.rust-lang.org/cargo/getting-started/installation.html  
+  * 3.1- (Windows) Caso esteja utilizando o VS Code e ao tentar instalar receba o erro: ``` could not remove 'rustup-bi
+n' ``` feche o VS Code e tente novamente.
   
 ### Rodando o código
 * 1- Use o Cargo para compilar e executar o código.   
