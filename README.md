@@ -9,7 +9,9 @@ Instruções
 * 2- (Windows) Instale o Visual Studio Installer https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=BuildTools&rel=15  
   * 2.1- Instale as ferramentas de build do Visual C++, marcando a opção indicada na foto (Conjunto de ferramentas do VC++ 2015.3)
   ![Passo 2.1](https://i.imgur.com/NejaFP3.png)
+* 3- Instale o Cargo o gerenciador de pacotes do rust https://doc.rust-lang.org/cargo/getting-started/installation.html  
   
 ### Rodando o código
-* 1- Compile o código com o comando ```rustc main.rs```
-* 2- Rode o arquivo main.exe criado
+* 1- Use o Cargo para compilar e executar o código.   
+  * 1.1 - ```cargo build```: compila o código gerando um .exe.  
+  * 1.2 - ```cargo run```: compila e executa o código.  
