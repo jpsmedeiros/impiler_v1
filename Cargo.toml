@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["João Pedro Sá Medeiros <jpsmedeiros@id.uff.br>"]
 
 [dependencies]
+nom = "^4.0"
