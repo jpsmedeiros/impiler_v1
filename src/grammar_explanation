@@ -1,0 +1,27 @@
+Documentação da sintaxe dos arquivos .pest: https://docs.rs/pest_derive/1.0.8/pest_derive/#Grammar
+
+1.0 - Definindo número, inteiro e digito
+    num = @{ int ~ ("." ~ digit*)? ~ (^"e" ~ int)? }
+        int = { ("+" | "-")? ~ digit+ }
+        digit = { '0'..'9' }
+
+    1.1 - Digito
+        * Um dígito é um caractere numérico entre 0 e 9
+            ==> '0'..'9'
+    1.2 - Inteiro
+        * Um inteiro tem opcionalmente um símbolo "+" ou "-"
+            ==> ("+" | "-")?
+        * Seguido de
+            ==> ~
+        * Um ou mais digitos
+            ==> digit+
+
+    1.3 - Número
+        * É uma regra atômica
+            ==> @
+        * Um número primeiramente é composto de um inteiro
+            ==> int
+        * Seguido opcionalmente de um ponto (".") seguido por zero seguido por digitos
+            ==> ~ ("." ~ digit*)?
+        * Seguido opcionalmente da parte exponêncial
+            ==> ~ (^"e" ~ int)?
