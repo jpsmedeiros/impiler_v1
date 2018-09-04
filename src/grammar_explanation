@@ -43,3 +43,20 @@ Documentação da sintaxe dos arquivos .pest: https://docs.rs/pest_derive/1.0.8/
             ==> _
         * Pode ser uma adição ou subtração ou multiplicação ou divisão ou elevação
             ==> add | subtract | multiply | divide | power
+
+3.0 - Definindo termos e expressões
+    expr = { term ~ (operation ~ term)* }
+    term = _{ num | "(" ~ expr ~ ")" }
+
+    3.1 - Termo
+        * É uma regra silenciosa
+            ==> _
+        * Um termo pode ser um número
+            ==> num
+        * Ou uma expressão entre parênteses
+            ==> | "(" ~ expr ~ ")"
+    3.2 - Expressão
+        * Uma expressão pode ser um termo
+            ==> term
+        * Seguido por zero ou mais operações seguidas por termos
+            ==> ~ (operation ~ term)*

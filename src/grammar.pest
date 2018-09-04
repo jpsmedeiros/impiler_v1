@@ -8,3 +8,6 @@ operation = _{ add | subtract | multiply | divide | power }
     multiply = { "*" }
     divide   = { "/" }
     power    = { "^" }
+
+expr = { term ~ (operation ~ term)* }
+term = _{ num | "(" ~ expr ~ ")" }
