@@ -25,3 +25,21 @@ Documentação da sintaxe dos arquivos .pest: https://docs.rs/pest_derive/1.0.8/
             ==> ~ ("." ~ digit*)?
         * Seguido opcionalmente da parte exponêncial
             ==> ~ (^"e" ~ int)?
+
+2.0 - Definindo operações aritméticas
+    
+    operation = _{ add | subtract | multiply | divide | power }
+        add      = { "+" }
+        subtract = { "-" }
+        multiply = { "*" }
+        divide   = { "/" }
+        power    = { "^" }
+
+    2.1 - Adição, subtração, multiplicação, divisão e elevação
+        * São definidos pelos dados símbolos
+            ==> "+", "-", "*", "/", "^", respectivamente
+    2.2 - Operação
+        * É uma regra silenciosa (?)
+            ==> _
+        * Pode ser uma adição ou subtração ou multiplicação ou divisão ou elevação
+            ==> add | subtract | multiply | divide | power
