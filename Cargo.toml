@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["João Pedro Sá Medeiros <jpsmedeiros@id.uff.br>"]
 
 [dependencies]
-nom = "^4.0"
+pest = "^1.0"
+pest_derive = "^1.0"
