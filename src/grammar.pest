@@ -13,3 +13,5 @@ expr = { term ~ (operation ~ term)* }
 term = _{ num | "(" ~ expr ~ ")" }
 
 calculation = _{ soi ~ expr ~ eoi }
+
+whitespace = _{ " " | "\t" }
