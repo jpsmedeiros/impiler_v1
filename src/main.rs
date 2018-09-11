@@ -29,20 +29,20 @@ lazy_static! { //declare lazy evaluated static
     };
 }
 
-fn eval(expression: Pairs<Rule>) -> f64 {
+fn eval(expression: Pairs<Rule>) -> String {
     PREC_CLIMBER.climb(
         expression,
         |pair: Pair<Rule>| match pair.as_rule() {
-            Rule::num => pair.as_str().parse::<f64>().unwrap(),
+            Rule::num => pair.to_string(),
             Rule::expr => eval(pair.into_inner()),
             _ => unreachable!(),
         },
-        |lhs: f64, op: Pair<Rule>, rhs: f64| match op.as_rule() {
-            Rule::add      => lhs + rhs,
-            Rule::subtract => lhs - rhs,
-            Rule::multiply => lhs * rhs,
-            Rule::divide   => lhs / rhs,
-            Rule::power    => lhs.powf(rhs),
+        |lhs: String, op: Pair<Rule>, rhs: String | match op.as_rule() {
+            Rule::add      => (lhs.parse::<f64>().unwrap() + rhs.parse::<f64>().unwrap()).to_string(),
+            Rule::subtract => (lhs.parse::<f64>().unwrap() - rhs.parse::<f64>().unwrap()).to_string(),
+            Rule::multiply => (lhs.parse::<f64>().unwrap() * rhs.parse::<f64>().unwrap()).to_string(),
+            Rule::divide   => (lhs.parse::<f64>().unwrap() / rhs.parse::<f64>().unwrap()).to_string(),
+            Rule::power    => (lhs.parse::<f64>().unwrap().powf(rhs.parse::<f64>().unwrap())).to_string(),
             _ => unreachable!(),
         },
     )
@@ -58,12 +58,20 @@ fn main() {
 
     for line in stdin.lock().lines() {
         let line = line.unwrap();
-        let parse_result = Calculator::parse(Rule::calculation, &line);
+        let parse_result = Calculator::parse(Rule::calculation, &line).unwrap();
+        let tokens: Vec<_> = parse_result.flatten().tokens().collect();
+        let mut c = 0;
+        for pair in tokens.into_iter()
+                            .map(|letter| { c += 1; (letter, c) }) {
+                                println!("{:?}", pair.0);
+                            }
 
+        let parse_result = Calculator::parse(Rule::calculation, &line);
         match parse_result {
             Ok(calc) => println!(" = {}", eval(calc)),
             Err(_) => println!(" Syntax error"),
         }
+
         print_input_message();
     }
 }
