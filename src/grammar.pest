@@ -2,6 +2,8 @@ num = @{ int ~ ("." ~ digit*)? ~ (^"e" ~ int)? }
     int = { ("+" | "-")? ~ digit+ }
     digit = { '0'..'9' }
 
+bool = { "true" | "false" }
+
 operation = _{ add | subtract | multiply | divide | power }
     add      = { "+" }
     subtract = { "-" }
@@ -9,9 +11,17 @@ operation = _{ add | subtract | multiply | divide | power }
     divide   = { "/" }
     power    = { "^" }
 
+bool_operation = _{ not | and | or }
+    not = { "!" }
+    and = { "&" }
+    or  = { "|" }
+    
 expr = { term ~ (operation ~ term)* }
 term = _{ num | "(" ~ expr ~ ")" }
 
-calculation = _{ soi ~ expr ~ eoi }
+bool_expr = { bool_term ~ (bool_operation ~ bool_term)* }
+bool_term = _{ bool | "(" ~ bool_expr ~ ")" }
+
+calculation = _{ soi ~ expr ~ eoi | soi ~ bool_expr ~ eoi }
 
 whitespace = _{ " " | "\t" }
