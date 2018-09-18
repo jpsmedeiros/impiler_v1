@@ -15,5 +15,5 @@ n' ``` feche o VS Code e tente novamente.
   
 ### Rodando o código
 * 1- Use o Cargo para compilar e executar o código.   
-  * 1.1 - ```cargo build```: compila o código gerando um .exe.  
+  * 1.1 - ```cargo build```: Recupera dependências e compila o código gerando um .exe.  
   * 1.2 - ```cargo run```: compila e executa o código.  
