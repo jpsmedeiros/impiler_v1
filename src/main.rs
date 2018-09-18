@@ -11,6 +11,26 @@ use std::io::BufRead;
 
 const _GRAMMAR: &str = include_str!("grammar.pest");
 
+struct Sum{
+    lhs: f64,
+    rhs: f64,
+}
+
+enum Statement{
+    Exp,
+}
+
+enum Exp{
+    ArithExp,
+    BoolExp,
+}
+
+enum ArithExp{
+    Sum,
+    Mul,
+    f64,
+}
+
 #[derive(Parser)]
 #[grammar = "grammar.pest"]
 struct Calculator;
@@ -42,7 +62,6 @@ fn eval(expression: Pairs<Rule>) -> f64 {
             Rule::subtract => lhs - rhs,
             Rule::multiply => lhs * rhs,
             Rule::divide   => lhs / rhs,
-            Rule::power    => lhs.powf(rhs),
             _ => unreachable!(),
         },
     )
