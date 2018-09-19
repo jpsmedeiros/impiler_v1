@@ -22,6 +22,7 @@ enum Exp{
     BoolExp,
 }
 
+#[derive(Debug)]
 enum ArithExp{
     Sum{
         lhs: Box<ArithExp>,
@@ -105,6 +106,7 @@ fn main() {
     
     //println!("{} {}",x.lhs,x.rhs);
     let soma = sum(num(3.0), num(2.0));
+    println!("SOMA = {:?}", soma);
     match soma {
         ArithExp => println!("ArithExp")
     }
