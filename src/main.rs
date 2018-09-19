@@ -9,6 +9,7 @@ use pest::iterators::{Pair, Pairs};
 use pest::prec_climber::*;
 use std::io::BufRead;
 use std::fmt;
+use std::f64;
 
 const _GRAMMAR: &str = include_str!("grammar.pest");
 
@@ -29,6 +30,10 @@ enum ArithExp{
         rhs: Box<ArithExp>
     },
     Mul {
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
+    },
+    Div {
         lhs: Box<ArithExp>,
         rhs: Box<ArithExp>
     },
@@ -86,9 +91,9 @@ fn eval(expression: Pairs<Rule>) -> std::boxed::Box<ArithExp> {
        },
        |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
            Rule::add      => sum(lhs, rhs),
-           //Rule::subtract => sum(lhs, rhs),
+           Rule::subtract => sum(lhs, num(get_num_value(rhs)*-1.0)),
            Rule::multiply => mul(lhs, rhs),
-           //Rule::divide   => lhs / rhs,
+           Rule::divide   => div(lhs, rhs),
            _ => unreachable!(),
        },
    )
@@ -110,6 +115,17 @@ fn mul(lhs: std::boxed::Box<ArithExp>, rhs: std::boxed::Box<ArithExp>) -> std::b
     Box::new(ArithExp::Mul { lhs, rhs })
 }
 
+fn div(lhs: std::boxed::Box<ArithExp>, rhs: std::boxed::Box<ArithExp>) -> std::boxed::Box<ArithExp>{
+    Box::new(ArithExp::Div { lhs, rhs })
+}
+
+fn get_num_value(num: std::boxed::Box<ArithExp>) -> f64 {
+    match *num {
+        ArithExp::Num{value} => value,
+        _ => f64::NAN
+    }
+}
+
 fn main() {
 
     // Exemplos
@@ -118,6 +134,12 @@ fn main() {
     // match soma {
     //     ArithExp => println!("ArithExp")
     // }
+
+    let number = num(1.0);
+    match *number {
+        ArithExp::Num{value} => println!("VALUE = {}", value),
+        _ => ()
+    }
 
     print_input_message();
     let stdin = std::io::stdin();
