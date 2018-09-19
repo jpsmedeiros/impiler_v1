@@ -72,23 +72,23 @@ lazy_static! { //declare lazy evaluated static
     };
 }
 
-//fn eval(expression: Pairs<Rule>) -> ArithExp {
-//    PREC_CLIMBER.climb(
-//        expression,
-//        |pair: Pair<Rule>| match pair.as_rule() {
-//            Rule::num => ArithExp::Num {value: pair.as_str().parse::<f64>().unwrap() },
-//            Rule::expr => eval(pair.into_inner()),
-//            _ => unreachable!(),
-//        },
-//        |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
-//            Rule::add      => Sum {lhs: lhs, rhs: rhs},
-//            //Rule::subtract => lhs - rhs,
-//            //Rule::multiply => lhs * rhs,
-//            //Rule::divide   => lhs / rhs,
-//            _ => unreachable!(),
-//        },
-//    )
-//}
+fn eval(expression: Pairs<Rule>) -> std::boxed::Box<ArithExp> {
+   PREC_CLIMBER.climb(
+       expression,
+       |pair: Pair<Rule>| match pair.as_rule() {
+           Rule::num => num(pair.as_str().parse::<f64>().unwrap()),
+           Rule::expr => eval(pair.into_inner()),
+           _ => unreachable!(),
+       },
+       |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
+           Rule::add      => sum(lhs, rhs),
+           //Rule::subtract => lhs - rhs,
+           //Rule::multiply => lhs * rhs,
+           //Rule::divide   => lhs / rhs,
+           _ => unreachable!(),
+       },
+   )
+}
 
 fn print_input_message() {
     println!("\nDigite o cálculo desejado");
@@ -104,12 +104,12 @@ fn sum(lhs: std::boxed::Box<ArithExp>, rhs: std::boxed::Box<ArithExp>) -> std::b
 
 fn main() {
     
-    //println!("{} {}",x.lhs,x.rhs);
-    let soma = sum(num(3.0), num(2.0));
-    println!("SOMA = {:?}", soma);
-    match soma {
-        ArithExp => println!("ArithExp")
-    }
+    // Exemplos
+    // let soma = sum(num(3.0), num(2.0));
+    // println!("SOMA = {:?}", soma);
+    // match soma {
+    //     ArithExp => println!("ArithExp")
+    // }
 
     print_input_message();
     let stdin = std::io::stdin();
@@ -119,7 +119,7 @@ fn main() {
         let parse_result = Calculator::parse(Rule::calculation, &line);
 
         match parse_result {
-            Ok(calc) => println!("okay"),
+            Ok(calc) => println!("pilib = {:?}", eval(calc)),
             Err(_) => println!(" Syntax error"),
         }
         print_input_message();
