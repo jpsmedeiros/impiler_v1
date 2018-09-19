@@ -39,8 +39,8 @@ fn eval(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::ArithExp> {
    PREC_CLIMBER.climb(
        expression,
        |pair: Pair<Rule>| match pair.as_rule() {
-           //Rule::num => num(pair.as_str().parse::<f64>().unwrap()),
-           //Rule::expr => eval(pair.into_inner()),
+           Rule::num => num(pair.as_str().parse::<f64>().unwrap()),
+           Rule::expr => eval(pair.into_inner()),
            _ => unreachable!(),
        },
        |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
@@ -78,9 +78,8 @@ fn main() {
     for line in stdin.lock().lines() {
         let line = line.unwrap();
         let parse_result = Calculator::parse(Rule::calculation, &line);
-        let result;
         match parse_result {
-            Ok(calc) => result = eval(calc),
+            Ok(calc) => println!("= {:?}", eval(calc)),
             Err(_) => println!(" Syntax error"),
         }
         let result = Box::leak(sum(num(3.0), num(2.0)));
