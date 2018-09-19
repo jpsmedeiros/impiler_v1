@@ -8,13 +8,10 @@ use pest::Parser;
 use pest::iterators::{Pair, Pairs};
 use pest::prec_climber::*;
 use std::io::BufRead;
+use std::fmt;
 
 const _GRAMMAR: &str = include_str!("grammar.pest");
 
-struct Sum{
-    lhs: f64,
-    rhs: f64,
-}
 
 enum Statement{
     Exp,
@@ -26,13 +23,13 @@ enum Exp{
 }
 
 enum ArithExp{
-    Sum,
-    Mul,
-    Num,
-}
-
-struct Num{
-    value: f64,
+    Sum{
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
+    },
+    Num {
+        value: f64
+    },
 }
 
 struct Node<T> {
@@ -96,11 +93,19 @@ fn print_input_message() {
     println!("\nDigite o cálculo desejado");
 }
 
-fn main() {
-    let x = Sum { lhs: 5.0, rhs: 2.1 };
-    //println!("{} {}",x.lhs,x.rhs);
+fn num(value: f64) -> std::boxed::Box<ArithExp>{
+    Box::new(ArithExp::Num { value })
+}
 
-    match x {
+fn sum(lhs: std::boxed::Box<ArithExp>, rhs: std::boxed::Box<ArithExp>) -> std::boxed::Box<ArithExp>{
+    Box::new(ArithExp::Sum { lhs, rhs })
+}
+
+fn main() {
+    
+    //println!("{} {}",x.lhs,x.rhs);
+    let soma = sum(num(3.0), num(2.0));
+    match soma {
         ArithExp => println!("ArithExp")
     }
 
