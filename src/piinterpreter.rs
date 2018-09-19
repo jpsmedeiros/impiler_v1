@@ -22,6 +22,10 @@ pub enum ArithExp{
         lhs: Box<ArithExp>,
         rhs: Box<ArithExp>
     },
+    Div {
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
+    },
     Num {
         value: f64
     },
@@ -61,10 +65,22 @@ pub fn mul(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<ArithExp>{
     Box::new(ArithExp::Mul { lhs, rhs })
 }
 
-pub fn eval(program: &ArithExp) {
+pub fn div(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<ArithExp>{
+    Box::new(ArithExp::Div { lhs, rhs })
+}
+
+pub fn get_num_value(num: Box<ArithExp>) -> f64 {
+    match *num {
+        ArithExp::Num{value} => value,
+        _ => unreachable!(),
+    }
+}
+
+pub fn eval_tree(program: &ArithExp) {
     match program {
         ArithExp::Sum {lhs, rhs} => println!("sum"),
         ArithExp::Num {value} => println!("{}", value),
-        ArithExp::Mul {lhs, rhs} => println!("mul")
+        ArithExp::Mul {lhs, rhs} => println!("mul"),
+        ArithExp::Div {lhs, rhs} => println!("div")
     }    
 }

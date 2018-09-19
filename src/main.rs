@@ -9,11 +9,13 @@ use pest::iterators::{Pair, Pairs};
 use pest::prec_climber::*;
 use std::io::BufRead;
 use std::fmt;
+use std::f64;
 
 const _GRAMMAR: &str = include_str!("grammar.pest");
 
 mod piinterpreter;
 
+use piinterpreter::*;
 
 #[derive(Parser)]
 #[grammar = "grammar.pest"]
@@ -33,7 +35,7 @@ lazy_static! { //declare lazy evaluated static
     };
 }
 
-fn eval(expression: Pairs<Rule>) -> &str {
+fn eval(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::ArithExp> {
    PREC_CLIMBER.climb(
        expression,
        |pair: Pair<Rule>| match pair.as_rule() {
@@ -42,10 +44,10 @@ fn eval(expression: Pairs<Rule>) -> &str {
            _ => unreachable!(),
        },
        |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
-           //Rule::add      => sum(lhs, rhs),
-           //Rule::subtract => sum(lhs, rhs),
-           //Rule::multiply => mul(lhs, rhs),
-           //Rule::divide   => lhs / rhs,
+           Rule::add      => sum(lhs, rhs),
+           Rule::subtract => sum(lhs, num(get_num_value(rhs)*-1.0)),
+           Rule::multiply => mul(lhs, rhs),
+           Rule::divide   => div(lhs, rhs),
            _ => unreachable!(),
        },
    )
@@ -64,19 +66,25 @@ fn main() {
     //     ArithExp => println!("ArithExp")
     // }
 
+    let number = num(1.0);
+    match *number {
+        ArithExp::Num{value} => println!("VALUE = {}", value),
+        _ => ()
+    }
+
     print_input_message();
     let stdin = std::io::stdin();
 
     for line in stdin.lock().lines() {
         let line = line.unwrap();
         let parse_result = Calculator::parse(Rule::calculation, &line);
-        //let result;
-        //match parse_result {
-        //    Ok(calc) => result = eval(calc),
-        //    Err(_) => println!(" Syntax error"),
-        //}
-        let result = Box::leak(piinterpreter::sum(piinterpreter::num(3.0), piinterpreter::num(2.0)));
-        piinterpreter::eval(result);
+        let result;
+        match parse_result {
+            Ok(calc) => result = eval(calc),
+            Err(_) => println!(" Syntax error"),
+        }
+        let result = Box::leak(sum(num(3.0), num(2.0)));
+        piinterpreter::eval_tree(result);
         print_input_message();
     }
 }
