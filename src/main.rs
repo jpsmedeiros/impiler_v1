@@ -28,6 +28,10 @@ enum ArithExp{
         lhs: Box<ArithExp>,
         rhs: Box<ArithExp>
     },
+    Mul {
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
+    },
     Num {
         value: f64
     },
@@ -82,8 +86,8 @@ fn eval(expression: Pairs<Rule>) -> std::boxed::Box<ArithExp> {
        },
        |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
            Rule::add      => sum(lhs, rhs),
-           //Rule::subtract => lhs - rhs,
-           //Rule::multiply => lhs * rhs,
+           //Rule::subtract => sum(lhs, rhs),
+           Rule::multiply => mul(lhs, rhs),
            //Rule::divide   => lhs / rhs,
            _ => unreachable!(),
        },
@@ -102,8 +106,12 @@ fn sum(lhs: std::boxed::Box<ArithExp>, rhs: std::boxed::Box<ArithExp>) -> std::b
     Box::new(ArithExp::Sum { lhs, rhs })
 }
 
+fn mul(lhs: std::boxed::Box<ArithExp>, rhs: std::boxed::Box<ArithExp>) -> std::boxed::Box<ArithExp>{
+    Box::new(ArithExp::Mul { lhs, rhs })
+}
+
 fn main() {
-    
+
     // Exemplos
     // let soma = sum(num(3.0), num(2.0));
     // println!("SOMA = {:?}", soma);
