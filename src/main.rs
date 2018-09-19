@@ -12,51 +12,8 @@ use std::fmt;
 
 const _GRAMMAR: &str = include_str!("grammar.pest");
 
+mod piinterpreter;
 
-enum Statement{
-    Exp,
-}
-
-enum Exp{
-    ArithExp,
-    BoolExp,
-}
-
-#[derive(Debug)]
-enum ArithExp{
-    Sum{
-        lhs: Box<ArithExp>,
-        rhs: Box<ArithExp>
-    },
-    Mul {
-        lhs: Box<ArithExp>,
-        rhs: Box<ArithExp>
-    },
-    Num {
-        value: f64
-    },
-}
-
-struct Node<T> {
-    data: T,
-    next: Option<Box<Node<T>>>,
-}
-
-struct List<T> {
-    head: Option<Box<Node<T>>>,
-}
-
-impl<T> List<T> {
-    fn new() -> List<T> {
-        List { head: None }
-    }
-}
-
-//struct PiAut{
-//    control_stack: Stack,
-//    value_stack: Stack,
-//    store: Stack,
-//}
 
 #[derive(Parser)]
 #[grammar = "grammar.pest"]
@@ -76,18 +33,18 @@ lazy_static! { //declare lazy evaluated static
     };
 }
 
-fn eval(expression: Pairs<Rule>) -> std::boxed::Box<ArithExp> {
+fn eval(expression: Pairs<Rule>) -> &str {
    PREC_CLIMBER.climb(
        expression,
        |pair: Pair<Rule>| match pair.as_rule() {
-           Rule::num => num(pair.as_str().parse::<f64>().unwrap()),
-           Rule::expr => eval(pair.into_inner()),
+           //Rule::num => num(pair.as_str().parse::<f64>().unwrap()),
+           //Rule::expr => eval(pair.into_inner()),
            _ => unreachable!(),
        },
        |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
-           Rule::add      => sum(lhs, rhs),
+           //Rule::add      => sum(lhs, rhs),
            //Rule::subtract => sum(lhs, rhs),
-           Rule::multiply => mul(lhs, rhs),
+           //Rule::multiply => mul(lhs, rhs),
            //Rule::divide   => lhs / rhs,
            _ => unreachable!(),
        },
@@ -96,18 +53,6 @@ fn eval(expression: Pairs<Rule>) -> std::boxed::Box<ArithExp> {
 
 fn print_input_message() {
     println!("\nDigite o cálculo desejado");
-}
-
-fn num(value: f64) -> std::boxed::Box<ArithExp>{
-    Box::new(ArithExp::Num { value })
-}
-
-fn sum(lhs: std::boxed::Box<ArithExp>, rhs: std::boxed::Box<ArithExp>) -> std::boxed::Box<ArithExp>{
-    Box::new(ArithExp::Sum { lhs, rhs })
-}
-
-fn mul(lhs: std::boxed::Box<ArithExp>, rhs: std::boxed::Box<ArithExp>) -> std::boxed::Box<ArithExp>{
-    Box::new(ArithExp::Mul { lhs, rhs })
 }
 
 fn main() {
@@ -125,11 +70,13 @@ fn main() {
     for line in stdin.lock().lines() {
         let line = line.unwrap();
         let parse_result = Calculator::parse(Rule::calculation, &line);
-
-        match parse_result {
-            Ok(calc) => println!("pilib = {:?}", eval(calc)),
-            Err(_) => println!(" Syntax error"),
-        }
+        //let result;
+        //match parse_result {
+        //    Ok(calc) => result = eval(calc),
+        //    Err(_) => println!(" Syntax error"),
+        //}
+        let result = Box::leak(piinterpreter::sum(piinterpreter::num(3.0), piinterpreter::num(2.0)));
+        piinterpreter::eval(result);
         print_input_message();
     }
 }
