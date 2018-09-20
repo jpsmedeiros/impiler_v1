@@ -59,19 +59,6 @@ fn print_input_message() {
 
 fn main() {
 
-    // Exemplos
-    // let soma = sum(num(3.0), num(2.0));
-    // println!("SOMA = {:?}", soma);
-    // match soma {
-    //     ArithExp => println!("ArithExp")
-    // }
-
-    let number = num(1.0);
-    match *number {
-        ArithExp::Num{value} => println!("VALUE = {}", value),
-        _ => ()
-    }
-
     print_input_message();
     let stdin = std::io::stdin();
 
@@ -82,8 +69,6 @@ fn main() {
             Ok(calc) => println!("= {:?}", eval(calc)),
             Err(_) => println!(" Syntax error"),
         }
-        let result = Box::leak(sum(num(3.0), num(2.0)));
-        piinterpreter::eval_tree(result);
         print_input_message();
     }
 }
