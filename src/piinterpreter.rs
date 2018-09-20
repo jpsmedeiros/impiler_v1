@@ -18,6 +18,10 @@ pub enum ArithExp{
         lhs: Box<ArithExp>,
         rhs: Box<ArithExp>
     },
+    Sub {
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
+    },
     Mul {
         lhs: Box<ArithExp>,
         rhs: Box<ArithExp>
@@ -61,6 +65,10 @@ pub fn sum(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<ArithExp>{
     Box::new(ArithExp::Sum { lhs, rhs })
 }
 
+pub fn sub(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<ArithExp>{
+    Box::new(ArithExp::Sub { lhs, rhs })
+}
+
 pub fn mul(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<ArithExp>{
     Box::new(ArithExp::Mul { lhs, rhs })
 }
@@ -79,8 +87,9 @@ pub fn get_num_value(num: Box<ArithExp>) -> f64 {
 pub fn eval_tree(program: &ArithExp) {
     match program {
         ArithExp::Sum {lhs, rhs} => println!("sum"),
-        ArithExp::Num {value} => println!("{}", value),
+        ArithExp::Sub {lhs, rhs} => println!("sub"),
         ArithExp::Mul {lhs, rhs} => println!("mul"),
-        ArithExp::Div {lhs, rhs} => println!("div")
+        ArithExp::Div {lhs, rhs} => println!("div"),
+        ArithExp::Num {value} => println!("{}", value)
     }    
 }

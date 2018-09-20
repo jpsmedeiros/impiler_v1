@@ -45,7 +45,7 @@ fn eval(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::ArithExp> {
        },
        |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
            Rule::add      => sum(lhs, rhs),
-           Rule::subtract => sum(lhs, num(get_num_value(rhs)*-1.0)),
+           Rule::subtract => sub(lhs, rhs),
            Rule::multiply => mul(lhs, rhs),
            Rule::divide   => div(lhs, rhs),
            _ => unreachable!(),
