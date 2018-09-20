@@ -61,8 +61,8 @@ fn print_input_message() {
 fn main() {
 
     let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    //aut.push_ctrl(sum(num(5.0),num(2.0)));
     aut.push_ctrl(num(5.0));
-    aut.push_ctrl(num(3.0));
     aut.print_ctrl();
 
     println!("____________");
@@ -70,7 +70,11 @@ fn main() {
     aut.print_ctrl();
     aut.print_value();
 
-
+    /*let x: piinterpreter::KW = piinterpreter::KW::KWSum {};
+    match x{
+        KWSum => println!("aha"),
+    }
+    */
 
     /*
     let mut list: LinkedList<Box<ArithExp>> = LinkedList::new();

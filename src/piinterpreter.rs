@@ -37,8 +37,21 @@ pub enum ArithExp{
     },
 }
 
+pub enum CtrlStackTypes{
+    KW,
+    ArithExp,
+}
+
+pub enum KW {
+    KWSum,
+    KWSub,
+    KWMul,
+    KWDiv,
+}
+
 pub struct PiAut{
-    control_stack: LinkedList<Box<ArithExp>>,
+    //control_stack: LinkedList<Box<ArithExp>>,
+    control_stack: LinkedList<Box<CtrlStackTypes>>,
     value_stack: LinkedList<Box<ArithExp>>,
 }
 
@@ -47,11 +60,13 @@ impl PiAut{
         PiAut{ control_stack: LinkedList::new(), value_stack: LinkedList::new() }
     }
 
-    pub fn push_ctrl(&mut self,x: Box<ArithExp>){
+    //pub fn push_ctrl(&mut self,x: Box<ArithExp>){
+    pub fn push_ctrl(&mut self,x: Box<CtrlStackTypes>){
         self.control_stack.push_front(x);
     }
 
-    pub fn pop_ctrl(&mut self) -> Option<Box<ArithExp>>{
+    //pub fn pop_ctrl(&mut self) -> Option<Box<ArithExp>>{
+    pub fn pop_ctrl(&mut self) -> Option<Box<CtrlStackTypes>>{
         self.control_stack.pop_front()
     }
 
@@ -76,6 +91,13 @@ impl PiAut{
             println!("{:?}",element);
         }
     }
+
+    pub fn sum_op(&mut self, lhs: Box<ArithExp>, rhs: Box<ArithExp>){
+        let kw = KW::KWSum {};
+        self.push_ctrl(kw);
+        self.push_ctrl(rhs);
+        self.push_ctrl(lhs);
+    }
 }
 
 pub fn eval_automata(mut aut: PiAut) -> PiAut{
@@ -83,6 +105,7 @@ pub fn eval_automata(mut aut: PiAut) -> PiAut{
 
     match *tree.unwrap(){
         ArithExp::Num{value} => aut.push_value(num(value)),
+        ArithExp::Sum{lhs,rhs} => aut.sum_op(lhs,rhs),
         _ => unreachable!(),
     }
 
@@ -93,7 +116,8 @@ pub fn eval_automata(mut aut: PiAut) -> PiAut{
 
 
 
-pub fn num(value: f64) -> Box<ArithExp>{
+//pub fn num(value: f64) -> Box<ArithExp>{
+pub fn num(value: f64) -> Box<CtrlStackTypes>{
     Box::new(ArithExp::Num { value })
 }
 
