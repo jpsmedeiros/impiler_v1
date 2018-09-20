@@ -41,20 +41,26 @@ pub struct PiAut{
     value_stack: LinkedList<Box<ArithExp>>,
 }
 
-
-/*
 impl PiAut{
     pub fn new() -> PiAut{
-
         PiAut{ control_stack: LinkedList::new(), value_stack: LinkedList::new() }
     }
 
-    pub fn push_ctrl(x: ArithExp) -> PiAut{
+    pub fn push_ctrl(&mut self,x: Box<ArithExp>){
+        self.control_stack.push_front(x);
+    }
 
-        control_stack.push_front(x);
+    pub fn print_ctrl(&self){
+        let i = self.control_stack.iter();
+        for element in i{
+            println!("{:?}",element);
+        }
     }
 }
-*/
+
+
+
+
 
 pub fn num(value: f64) -> Box<ArithExp>{
     Box::new(ArithExp::Num { value })
