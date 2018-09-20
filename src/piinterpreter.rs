@@ -3,6 +3,7 @@ use std::fmt;
 use std;
 use std::boxed::Box;
 use std::collections::LinkedList;
+use std::option::Option;
 
 enum Statement{
     Exp,
@@ -50,12 +51,26 @@ impl PiAut{
         self.control_stack.push_front(x);
     }
 
+    pub fn pop_ctrl(&mut self) -> Option<Box<ArithExp>>{
+        self.control_stack.pop_front()
+    }
+
+    pub fn push_value(&mut self,x: Box<ArithExp>){
+        self.value_stack.push_front(x);
+    }
+
+    pub fn pop_value(&mut self) -> Option<Box<ArithExp>>{
+        self.value_stack.pop_front()
+    }
+
     pub fn print_ctrl(&self){
         let i = self.control_stack.iter();
         for element in i{
             println!("{:?}",element);
         }
     }
+
+
 }
 
 

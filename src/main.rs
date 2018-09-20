@@ -63,7 +63,13 @@ fn main() {
 
     let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
     aut.push_ctrl(num(5.0));
+    aut.push_ctrl(num(3.0));
+
     aut.print_ctrl();
+
+    aut.pop_ctrl();
+    aut.print_ctrl();
+
 
     /*
     let mut list: LinkedList<Box<ArithExp>> = LinkedList::new();
