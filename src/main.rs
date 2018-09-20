@@ -60,15 +60,16 @@ fn print_input_message() {
 
 fn main() {
 
-
     let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
     aut.push_ctrl(num(5.0));
     aut.push_ctrl(num(3.0));
-
     aut.print_ctrl();
 
-    aut.pop_ctrl();
+    println!("____________");
+    aut = eval_automata(aut);
     aut.print_ctrl();
+    aut.print_value();
+
 
 
     /*
