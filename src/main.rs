@@ -10,6 +10,7 @@ use pest::prec_climber::*;
 use std::io::BufRead;
 use std::fmt;
 use std::f64;
+use std::collections::LinkedList;
 
 const _GRAMMAR: &str = include_str!("grammar.pest");
 
@@ -59,6 +60,32 @@ fn print_input_message() {
 
 fn main() {
 
+    /*
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    aut.push_ctrl(num(5.0));
+    */
+    
+    /*
+    let mut list: LinkedList<Box<ArithExp>> = LinkedList::new();
+    list.push_front(num(5.0));
+    list.push_front(num(2.0));
+
+    {
+        let list_iter = list.iter();
+        for element in list_iter{
+            println!("{:?}",element);
+        }
+    }
+
+    list.push_front(sum(num(3.0),num(2.0)));
+    list.pop_back();
+    for element in list{
+        println!("{:?}",element);
+    }
+    */
+
+
+
     print_input_message();
     let stdin = std::io::stdin();
 
@@ -66,7 +93,7 @@ fn main() {
         let line = line.unwrap();
         let parse_result = Calculator::parse(Rule::calculation, &line);
         match parse_result {
-            Ok(calc) => println!("= {:?}", eval(calc)),
+            Ok(calc) => { println!("= {:?}", eval(calc)); println!("aaa mlk") },
             Err(_) => println!(" Syntax error"),
         }
         print_input_message();

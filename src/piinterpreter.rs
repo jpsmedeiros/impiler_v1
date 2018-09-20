@@ -2,6 +2,7 @@ use std::io::BufRead;
 use std::fmt;
 use std;
 use std::boxed::Box;
+use std::collections::LinkedList;
 
 enum Statement{
     Exp,
@@ -35,27 +36,25 @@ pub enum ArithExp{
     },
 }
 
-struct Node<T> {
-    data: T,
-    next: Option<Box<Node<T>>>,
+pub struct PiAut{
+    control_stack: LinkedList<Box<ArithExp>>,
+    value_stack: LinkedList<Box<ArithExp>>,
 }
 
-struct List<T> {
-    head: Option<Box<Node<T>>>,
-}
 
-impl<T> List<T> {
-    fn new() -> List<T> {
-        List { head: None }
+/*
+impl PiAut{
+    pub fn new() -> PiAut{
+
+        PiAut{ control_stack: LinkedList::new(), value_stack: LinkedList::new() }
+    }
+
+    pub fn push_ctrl(x: ArithExp) -> PiAut{
+
+        control_stack.push_front(x);
     }
 }
-
-//struct PiAut{
-//    control_stack: Stack,
-//    value_stack: Stack,
-//    store: Stack,
-//}
-
+*/
 
 pub fn num(value: f64) -> Box<ArithExp>{
     Box::new(ArithExp::Num { value })
@@ -91,5 +90,5 @@ pub fn eval_tree(program: &ArithExp) {
         ArithExp::Mul {lhs, rhs} => println!("mul"),
         ArithExp::Div {lhs, rhs} => println!("div"),
         ArithExp::Num {value} => println!("{}", value)
-    }    
+    }
 }
