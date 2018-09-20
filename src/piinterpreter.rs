@@ -7,12 +7,12 @@ enum Statement{
     Exp,
 }
 
-enum Exp{
+#[derive(Debug)]
+pub enum Exp{
     ArithExp,
     BoolExp,
 }
 
-#[derive(Debug)]
 pub enum ArithExp{
     Sum{
         lhs: Box<ArithExp>,
@@ -33,6 +33,27 @@ pub enum ArithExp{
     Num {
         value: f64
     },
+}
+
+pub enum BoolExp{
+    Eq {
+        lhs: Box<BoolExp>,
+        rhs: Box<BoolExp>
+    },
+    Neg { 
+        value: Box<BoolExp>
+    },
+    And {
+        lhs: Box<BoolExp>,
+        rhs: Box<BoolExp>
+    },
+    Or {
+        lhs: Box<BoolExp>,
+        rhs: Box<BoolExp>
+    },
+    Bool {
+        value: bool
+    }
 }
 
 struct Node<T> {
@@ -75,6 +96,26 @@ pub fn mul(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<ArithExp>{
 
 pub fn div(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<ArithExp>{
     Box::new(ArithExp::Div { lhs, rhs })
+}
+
+pub fn boolean(value: bool) -> Box<BoolExp>{
+    Box::new(BoolExp::Bool { value })
+}
+
+pub fn eq(lhs: Box<BoolExp>, rhs: Box<BoolExp>) -> Box<BoolExp>{
+    Box::new(BoolExp::Eq { lhs, rhs })
+}
+
+pub fn neg(value: Box<BoolExp>) -> Box<BoolExp>{
+    Box::new(BoolExp::Neg { value })
+}
+
+pub fn and(lhs: Box<BoolExp>, rhs: Box<BoolExp>) -> Box<BoolExp>{
+    Box::new(BoolExp::And { lhs, rhs })
+}
+
+pub fn or(lhs: Box<BoolExp>, rhs: Box<BoolExp>) -> Box<BoolExp>{
+    Box::new(BoolExp::Or { lhs, rhs })
 }
 
 pub fn get_num_value(num: Box<ArithExp>) -> f64 {

@@ -29,18 +29,20 @@ lazy_static! { //declare lazy evaluated static
 
         PrecClimber::new(vec![
             Operator::new(add, Left) | Operator::new(subtract, Left),
-            Operator::new(multiply, Left) | Operator::new(divide, Left),
-            Operator::new(power, Right)
+            Operator::new(multiply, Left) | Operator::new(divide, Left)
         ])
     };
 }
 
-fn eval(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::ArithExp> {
+fn eval(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::Exp> {
+    println!("Expression = {}", expression);
    PREC_CLIMBER.climb(
        expression,
        |pair: Pair<Rule>| match pair.as_rule() {
            Rule::num => num(pair.as_str().parse::<f64>().unwrap()),
-           Rule::expr => eval(pair.into_inner()),
+           Rule::boolean => boolean(pair.as_str().parse::<bool>().unwrap()),
+           Rule::aexp => eval(pair.into_inner()),
+           Rule::bexp => eval(pair.into_inner()),
            _ => unreachable!(),
        },
        |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
@@ -49,7 +51,7 @@ fn eval(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::ArithExp> {
            Rule::multiply => mul(lhs, rhs),
            Rule::divide   => div(lhs, rhs),
            _ => unreachable!(),
-       },
+       }
    )
 }
 
