@@ -23,24 +23,33 @@ struct Calculator;
 
 
 lazy_static! { //declare lazy evaluated static
-    static ref PREC_CLIMBER: PrecClimber<Rule> = {
+    static ref MATH_CLIMBER: PrecClimber<Rule> = {
         use Rule::*;
         use Assoc::*;
 
         PrecClimber::new(vec![
             Operator::new(add, Left) | Operator::new(subtract, Left),
-            Operator::new(multiply, Left) | Operator::new(divide, Left),
-            Operator::new(power, Right)
+            Operator::new(multiply, Left) | Operator::new(divide, Left)
+        ])
+    };
+    static ref BOOL_CLIMBER: PrecClimber<Rule> = {
+        use Rule::*;
+        use Assoc::*;
+
+        PrecClimber::new(vec![
+            Operator::new(equal, Left),
+            Operator::new(and, Left) | Operator::new(or, Left),
+            Operator::new(neg, Right)
         ])
     };
 }
 
-fn eval(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::ArithExp> {
-   PREC_CLIMBER.climb(
+fn eval_arith(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::ArithExp> {
+    MATH_CLIMBER.climb(
        expression,
        |pair: Pair<Rule>| match pair.as_rule() {
            Rule::num => num(pair.as_str().parse::<f64>().unwrap()),
-           Rule::expr => eval(pair.into_inner()),
+           Rule::aexp => eval_arith(pair.into_inner()),
            _ => unreachable!(),
        },
        |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
@@ -49,9 +58,40 @@ fn eval(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::ArithExp> {
            Rule::multiply => mul(lhs, rhs),
            Rule::divide   => div(lhs, rhs),
            _ => unreachable!(),
-       },
+       }
    )
 }
+
+fn eval_bool(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
+    println!("Bool Expression = {}", expression);
+    BOOL_CLIMBER.climb(
+        expression,
+        |pair: Pair<Rule>| match pair.as_rule(){
+            Rule::boolean => boolean(pair.as_str().parse::<bool>().unwrap()),
+            Rule::bexp => eval_bool(pair.into_inner()),
+            //Rule::neg => neg(boolean(pair.into_inner().as_str().parse::<bool>().unwrap())),
+            _ => unreachable!(),
+        },
+        |lhs, op: Pair<Rule>, rhs | match op.as_rule(){
+            Rule::equal => eq(lhs, rhs),
+            Rule::and   => and(lhs, rhs),
+            Rule::or    => or(lhs, rhs),
+            _ => unreachable!(),
+        }
+    )
+}
+
+fn eval(pair: Pair<Rule>) -> () {
+    match pair.as_rule() {
+       Rule::aexp => println!("PI-LIB = {:?}", eval_arith(pair.into_inner())),
+       Rule::bexp => println!("PI-LIB = {:?}", eval_bool(pair.into_inner())),
+       _ => unreachable!() 
+    }
+}
+
+
+
+
 
 fn print_input_message() {
     println!("\nDigite o cálculo desejado");
@@ -66,7 +106,10 @@ fn main() {
         let line = line.unwrap();
         let parse_result = Calculator::parse(Rule::calculation, &line);
         match parse_result {
-            Ok(calc) => println!("= {:?}", eval(calc)),
+            Ok(mut pairs) => {
+                let enclosed = pairs.next().unwrap();
+                eval(enclosed);
+            },
             Err(_) => println!(" Syntax error"),
         }
         print_input_message();
