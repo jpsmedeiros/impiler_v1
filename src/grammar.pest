@@ -2,16 +2,35 @@ num = @{ int ~ ("." ~ digit*)? ~ (^"e" ~ int)? }
     int = { ("+" | "-")? ~ digit+ }
     digit = { '0'..'9' }
 
-operation = _{ add | subtract | multiply | divide | power }
+boolean = { "true" | "false" }
+
+arithop = _{ add | subtract | multiply | divide }
     add      = { "+" }
     subtract = { "-" }
     multiply = { "*" }
     divide   = { "/" }
-    power    = { "^" }
 
-expr = { term ~ (operation ~ term)* }
-term = _{ num | "(" ~ expr ~ ")" }
 
-calculation = _{ soi ~ expr ~ eoi }
+boolop = _{ equal | and | or }
+    equal = { "=" }
+    neg   = { "!" }
+    and   = { "/\u{005C}" }
+    or    = { "\u{005C}/"}
+
+    
+iop = _{ greater_than | greater_equal | less_than | less_equal }
+    greater_than  = { ">" }
+    greater_equal = { ">=" }
+    less_than     = { "<" }
+    less_equal    = { "<=" }    
+
+exp = _{ aexp | bexp }
+aexp = { aterm ~ (arithop ~ aterm)* }
+bexp = { bterm ~ (boolop ~ bterm)* | "~" ~ bexp | neg ~ bterm }
+
+aterm = _{ num | "(" ~ aexp ~ ")" }
+bterm = _{ boolean | "(" ~ bexp ~ ")"}
+
+calculation = _{ soi ~ exp ~ eoi }
 
 whitespace = _{ " " | "\t" }
