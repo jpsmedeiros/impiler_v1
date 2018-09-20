@@ -13,6 +13,7 @@ pub enum Exp{
     BoolExp,
 }
 
+#[derive(Debug)]
 pub enum ArithExp{
     Sum{
         lhs: Box<ArithExp>,
@@ -35,6 +36,7 @@ pub enum ArithExp{
     },
 }
 
+#[derive(Debug)]
 pub enum BoolExp{
     Eq {
         lhs: Box<BoolExp>,
