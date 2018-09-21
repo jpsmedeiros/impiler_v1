@@ -10,6 +10,7 @@ use pest::prec_climber::*;
 use std::io::BufRead;
 use std::fmt;
 use std::f64;
+use std::collections::LinkedList;
 
 const _GRAMMAR: &str = include_str!("grammar.pest");
 
@@ -93,7 +94,38 @@ fn print_input_message() {
     println!("\nDigite o cálculo desejado");
 }
 
+fn print_aut(result: Box<Exp>){
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    match *result {
+        Exp::ArithExp(arithExp) => aut.push_ctrl(Box::new(arithExp)),
+        Exp::ArithExp(boolExp)  => println!("TODO automato para expressões booleanas"),
+        _ => unreachable!()
+    }
+    aut = eval_automata(aut);
+
+    println!("Control Stack:");
+    aut.print_ctrl();
+    println!("Value Stack:");
+    aut.print_value();
+}
+
 fn main() {
+
+    /*
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    aut.push_ctrl(num(5.0));
+    aut.push_ctrl(num(2.0));
+
+    aut = eval_automata(aut);
+    aut.print_value();
+    */
+    /*
+    println!("____________");
+    aut = eval_automata(aut);
+    aut.print_ctrl();
+    aut.print_value();
+    */
+
 
     print_input_message();
     let stdin = std::io::stdin();
@@ -105,10 +137,12 @@ fn main() {
             Ok(mut pairs) => {
                 let enclosed = pairs.next().unwrap();
                 let pilib_result = eval(enclosed);
-                println!("Result = {:?}", pilib_result);                
+                println!("Result = {:?}", pilib_result);   
+                print_aut(pilib_result);             
             },
             Err(_) => println!(" Syntax error"),
         }
         print_input_message();
     }
+
 }

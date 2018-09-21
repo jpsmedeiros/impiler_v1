@@ -2,8 +2,10 @@ use std::io::BufRead;
 use std::fmt;
 use std;
 use std::boxed::Box;
+use std::collections::LinkedList;
+use std::option::Option;
 
-enum Statement{
+pub enum Statement{
     Exp,
 }
 
@@ -58,26 +60,61 @@ pub enum BoolExp{
     }
 }
 
-struct Node<T> {
-    data: T,
-    next: Option<Box<Node<T>>>,
+pub struct PiAut{
+    control_stack: LinkedList<Box<ArithExp>>,
+    value_stack: LinkedList<Box<ArithExp>>,
 }
 
-struct List<T> {
-    head: Option<Box<Node<T>>>,
-}
+impl PiAut{
+    pub fn new() -> PiAut{
+        PiAut{ control_stack: LinkedList::new(), value_stack: LinkedList::new() }
+    }
 
-impl<T> List<T> {
-    fn new() -> List<T> {
-        List { head: None }
+    pub fn push_ctrl(&mut self,x: Box<ArithExp>){
+        self.control_stack.push_front(x);
+    }
+
+    pub fn pop_ctrl(&mut self) -> Option<Box<ArithExp>>{
+        self.control_stack.pop_front()
+    }
+
+    pub fn push_value(&mut self,x: Box<ArithExp>){
+        self.value_stack.push_front(x);
+    }
+
+    pub fn pop_value(&mut self) -> Option<Box<ArithExp>>{
+        self.value_stack.pop_front()
+    }
+
+    pub fn print_ctrl(&self){
+        let i = self.control_stack.iter();
+        for element in i{
+            println!("{:?}",element);
+        }
+    }
+
+    pub fn print_value(&self){
+        let i = self.value_stack.iter();
+        for element in i{
+            println!("{:?}",element);
+        }
     }
 }
 
-//struct PiAut{
-//    control_stack: Stack,
-//    value_stack: Stack,
-//    store: Stack,
-//}
+pub fn eval_automata(mut aut: PiAut) -> PiAut{
+
+    while !aut.control_stack.is_empty(){
+        let tree = aut.pop_ctrl();
+        match *tree.unwrap(){
+            ArithExp::Num{value} => aut.push_value(num(value)),
+            _ => unreachable!(),
+        }
+    }
+    aut
+}
+
+
+
 
 
 pub fn num(value: f64) -> Box<ArithExp>{
@@ -143,5 +180,5 @@ pub fn eval_tree(program: &ArithExp) {
         ArithExp::Mul {lhs, rhs} => println!("mul"),
         ArithExp::Div {lhs, rhs} => println!("div"),
         ArithExp::Num {value} => println!("{}", value)
-    }    
+    }
 }
