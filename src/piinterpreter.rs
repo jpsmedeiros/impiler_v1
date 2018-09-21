@@ -9,8 +9,8 @@ enum Statement{
 
 #[derive(Debug)]
 pub enum Exp{
-    ArithExp,
-    BoolExp,
+    ArithExp(ArithExp),
+    BoolExp(BoolExp),
 }
 
 #[derive(Debug)]
@@ -125,6 +125,15 @@ pub fn get_num_value(num: Box<ArithExp>) -> f64 {
         ArithExp::Num{value} => value,
         _ => unreachable!(),
     }
+}
+ 
+pub fn arithExp_as_exp(expression: Box<ArithExp>) -> Box<Exp> {
+    Box::new(Exp::ArithExp(*expression))
+}
+
+pub fn boolExp_as_exp(expression: Box<BoolExp>) -> Box<Exp> {
+    //let exp = &*Box::leak(expression);
+    Box::new(Exp::BoolExp(*expression))
 }
 
 pub fn eval_tree(program: &ArithExp) {

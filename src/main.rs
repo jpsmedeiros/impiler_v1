@@ -81,17 +81,13 @@ fn eval_bool(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::BoolExp>
     )
 }
 
-fn eval(pair: Pair<Rule>) -> () {
+fn eval(pair: Pair<Rule>) -> Box<Exp> {
     match pair.as_rule() {
-       Rule::aexp => println!("PI-LIB = {:?}", eval_arith(pair.into_inner())),
-       Rule::bexp => println!("PI-LIB = {:?}", eval_bool(pair.into_inner())),
+       Rule::aexp => arithExp_as_exp(eval_arith(pair.into_inner())),
+       Rule::bexp => boolExp_as_exp(eval_bool(pair.into_inner())),
        _ => unreachable!() 
     }
 }
-
-
-
-
 
 fn print_input_message() {
     println!("\nDigite o cálculo desejado");
@@ -108,7 +104,8 @@ fn main() {
         match parse_result {
             Ok(mut pairs) => {
                 let enclosed = pairs.next().unwrap();
-                eval(enclosed);
+                let pilib_result = eval(enclosed);
+                println!("Result = {:?}", pilib_result);                
             },
             Err(_) => println!(" Syntax error"),
         }
