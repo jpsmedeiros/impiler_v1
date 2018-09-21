@@ -79,13 +79,14 @@ impl PiAut{
 }
 
 pub fn eval_automata(mut aut: PiAut) -> PiAut{
-    let tree = aut.pop_ctrl();
 
-    match *tree.unwrap(){
-        ArithExp::Num{value} => aut.push_value(num(value)),
-        _ => unreachable!(),
+    while !aut.control_stack.is_empty(){
+        let tree = aut.pop_ctrl();
+        match *tree.unwrap(){
+            ArithExp::Num{value} => aut.push_value(num(value)),
+            _ => unreachable!(),
+        }
     }
-
     aut
 }
 

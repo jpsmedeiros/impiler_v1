@@ -58,51 +58,51 @@ fn print_input_message() {
     println!("\nDigite o cálculo desejado");
 }
 
+fn print_aut(result: Box<ArithExp>){
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    aut.push_ctrl(result);
+    aut = eval_automata(aut);
+
+    println!("Control Stack:");
+    aut.print_ctrl();
+    println!("Value Stack:");
+    aut.print_value();
+}
+
 fn main() {
 
+    /*
     let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
     aut.push_ctrl(num(5.0));
-    aut.push_ctrl(num(3.0));
-    aut.print_ctrl();
+    aut.push_ctrl(num(2.0));
 
+    aut = eval_automata(aut);
+    aut.print_value();
+    */
+    /*
     println!("____________");
     aut = eval_automata(aut);
     aut.print_ctrl();
     aut.print_value();
-
-
-
-    /*
-    let mut list: LinkedList<Box<ArithExp>> = LinkedList::new();
-    list.push_front(num(5.0));
-    list.push_front(num(2.0));
-
-    {
-        let list_iter = list.iter();
-        for element in list_iter{
-            println!("{:?}",element);
-        }
-    }
-
-    list.push_front(sum(num(3.0),num(2.0)));
-    list.pop_back();
-    for element in list{
-        println!("{:?}",element);
-    }
     */
-
 
 
     print_input_message();
     let stdin = std::io::stdin();
+    let mut result;
 
     for line in stdin.lock().lines() {
         let line = line.unwrap();
         let parse_result = Calculator::parse(Rule::calculation, &line);
         match parse_result {
-            Ok(calc) => { println!("= {:?}", eval(calc)); println!("aaa mlk") },
+            Ok(calc) => {
+                            result = eval(calc);
+                            println!("= {:?}", result);
+                            print_aut(result);
+                        },
             Err(_) => println!(" Syntax error"),
         }
         print_input_message();
     }
+
 }
