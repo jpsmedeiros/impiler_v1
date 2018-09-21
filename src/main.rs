@@ -86,7 +86,7 @@ fn eval(pair: Pair<Rule>) -> Box<Exp> {
     match pair.as_rule() {
        Rule::aexp => arithExp_as_exp(eval_arith(pair.into_inner())),
        Rule::bexp => boolExp_as_exp(eval_bool(pair.into_inner())),
-       _ => unreachable!() 
+       _ => unreachable!()
     }
 }
 
@@ -97,8 +97,8 @@ fn print_input_message() {
 fn print_aut(result: Box<Exp>){
     let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
     match *result {
-        Exp::ArithExp(arithExp) => aut.push_ctrl(Box::new(arithExp)),
-        Exp::ArithExp(boolExp)  => println!("TODO automato para expressões booleanas"),
+        Exp::ArithExp(arithExp) => aut.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(Box::new(arithExp)))),
+        Exp::BoolExp(boolExp)  => aut.push_ctrl(exp_as_ctrl_stack_type(boolExp_as_exp(Box::new(boolExp)))),
         _ => unreachable!()
     }
     aut = eval_automata(aut);
@@ -111,22 +111,6 @@ fn print_aut(result: Box<Exp>){
 
 fn main() {
 
-    /*
-    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
-    aut.push_ctrl(num(5.0));
-    aut.push_ctrl(num(2.0));
-
-    aut = eval_automata(aut);
-    aut.print_value();
-    */
-    /*
-    println!("____________");
-    aut = eval_automata(aut);
-    aut.print_ctrl();
-    aut.print_value();
-    */
-
-
     print_input_message();
     let stdin = std::io::stdin();
 
@@ -137,8 +121,8 @@ fn main() {
             Ok(mut pairs) => {
                 let enclosed = pairs.next().unwrap();
                 let pilib_result = eval(enclosed);
-                println!("Result = {:?}", pilib_result);   
-                print_aut(pilib_result);             
+                println!("Result = {:?}", pilib_result);
+                print_aut(pilib_result);
             },
             Err(_) => println!(" Syntax error"),
         }
