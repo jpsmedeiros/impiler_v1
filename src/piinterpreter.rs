@@ -66,6 +66,7 @@ pub enum KW{
     KWSub,
     KWMul,
     KWDiv,
+    KWAnd,
 }
 
 #[derive(Debug)]
@@ -146,6 +147,14 @@ impl PiAut{
         self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(rhs)));
     }
 
+    pub fn and_rule(&mut self, lhs:Box<BoolExp>, rhs:Box<BoolExp>){
+        let x = Box::new(KW::KWAnd);
+        self.push_ctrl(kw_as_ctrl_stack_type(x));
+
+        self.push_ctrl(exp_as_ctrl_stack_type(boolExp_as_exp(lhs)));
+        self.push_ctrl(exp_as_ctrl_stack_type(boolExp_as_exp(rhs)));
+    }
+
     pub fn sum_kw_rule(&mut self){
         let n1 = get_num_value(self.pop_value().unwrap());
         let n2 = get_num_value(self.pop_value().unwrap());
@@ -177,6 +186,15 @@ impl PiAut{
 
         self.push_value(arithExp_as_exp(num(result)));
     }
+
+    pub fn and_kw_rule(&mut self){
+        let n1 = get_bool_value(self.pop_value().unwrap());
+        let n2 = get_bool_value(self.pop_value().unwrap());
+        let result = n1 && n2;
+
+        self.push_value(boolExp_as_exp(boolean(result)));
+    }
+
 }
 
 pub fn eval_aexp_aut(aexp: ArithExp, mut aut: PiAut) -> PiAut{
@@ -194,6 +212,7 @@ pub fn eval_aexp_aut(aexp: ArithExp, mut aut: PiAut) -> PiAut{
 pub fn eval_bexp_aut(bexp: BoolExp, mut aut: PiAut) -> PiAut{
     match bexp{
         BoolExp::Bool{value} => aut.push_value(boolExp_as_exp(boolean(value))),
+        BoolExp::And{lhs,rhs} => aut.and_rule(lhs,rhs),
         _ => unreachable!(),
     }
     aut
@@ -214,6 +233,7 @@ pub fn eval_kw_aut(keyword: KW,mut aut: PiAut) -> PiAut{
         KW::KWSub => aut.sub_kw_rule(),
         KW::KWMul => aut.mul_kw_rule(),
         KW::KWDiv => aut.div_kw_rule(),
+        KW::KWAnd => aut.and_kw_rule(),
         _ => unreachable!(),
     }
     aut
@@ -281,6 +301,18 @@ pub fn get_num_value(num: Box<Exp>) -> f64 {
     }
     match x{
         ArithExp::Num{value} => value,
+        _ => unreachable!(),
+    }
+}
+
+pub fn get_bool_value(num: Box<Exp>) -> bool {
+    let mut x: BoolExp;
+    match *num {
+        Exp::BoolExp(bexp) => x = bexp,
+        _ => unreachable!(),
+    }
+    match x{
+        BoolExp::Bool{value} => value,
         _ => unreachable!(),
     }
 }
