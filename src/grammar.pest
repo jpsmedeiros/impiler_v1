@@ -13,7 +13,7 @@ arithop = _{ add | subtract | multiply | divide }
 
 boolop = _{ equal | and | or }
     equal = { "=" }
-    neg   = { "!" }
+    neg   = { "~" }
     and   = { "/\u{005C}" }
     or    = { "\u{005C}/"}
 
@@ -26,11 +26,21 @@ iop = _{ greater_than | greater_equal | less_than | less_equal }
 
 exp = _{ aexp | bexp }
 aexp = { aterm ~ (arithop ~ aterm)* }
-bexp = { bterm ~ (boolop ~ bterm)* | "~" ~ bexp | neg ~ bterm }
+bexp = { bterm ~ (boolop ~ bterm)* | neg ~ bterm }
 
-aterm = _{ num | "(" ~ aexp ~ ")" }
+aterm = _{ num | "(" ~ aexp ~ ")" | id}
 bterm = _{ boolean | "(" ~ bexp ~ ")"}
 
-calculation = _{ soi ~ exp ~ eoi }
+identifier_char = _{ 'a'..'z' | 'A'..'Z' | '0'..'9' | "_" }
+id      =  {
+    !("true" | "false" ) ~ ('a'..'z' | 'A'..'Z') ~ identifier_char* |
+    "_" ~ identifier_char+
+}
+
+cmd = { cmdterm ~ ";" ~ cmd | cmdterm}
+
+cmdterm = _{ id ~ ":=" ~ exp |  "while" ~ "(" ~ bexp ~ ")" ~ "do" ~ "{" ~ cmd ~ "}"}
+
+impiler = _{ soi ~ (exp | cmd) ~ eoi }
 
 whitespace = _{ " " | "\t" }

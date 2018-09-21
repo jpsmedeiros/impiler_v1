@@ -20,7 +20,7 @@ use piinterpreter::*;
 
 #[derive(Parser)]
 #[grammar = "grammar.pest"]
-struct Calculator;
+struct Impiler;
 
 
 lazy_static! { //declare lazy evaluated static
@@ -91,7 +91,7 @@ fn eval(pair: Pair<Rule>) -> Box<Exp> {
 }
 
 fn print_input_message() {
-    println!("\nDigite o cálculo desejado");
+    println!("\nDigite o comando desejado");
 }
 
 fn print_aut(result: Box<Exp>){
@@ -132,7 +132,7 @@ fn main() {
 
     for line in stdin.lock().lines() {
         let line = line.unwrap();
-        let parse_result = Calculator::parse(Rule::calculation, &line);
+        let parse_result = Impiler::parse(Rule::impiler, &line);
         match parse_result {
             Ok(mut pairs) => {
                 let enclosed = pairs.next().unwrap();
