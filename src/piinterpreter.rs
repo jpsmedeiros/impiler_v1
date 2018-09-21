@@ -122,10 +122,58 @@ impl PiAut{
         self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(lhs)));
     }
 
+    pub fn sub_rule(&mut self, lhs:Box<ArithExp>, rhs:Box<ArithExp>){
+        let x = Box::new(KW::KWSub);
+        self.push_ctrl(kw_as_ctrl_stack_type(x));
+
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(lhs)));
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(rhs)));
+    }
+
+    pub fn mul_rule(&mut self, lhs:Box<ArithExp>, rhs:Box<ArithExp>){
+        let x = Box::new(KW::KWMul);
+        self.push_ctrl(kw_as_ctrl_stack_type(x));
+
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(lhs)));
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(rhs)));
+    }
+
+    pub fn div_rule(&mut self, lhs:Box<ArithExp>, rhs:Box<ArithExp>){
+        let x = Box::new(KW::KWDiv);
+        self.push_ctrl(kw_as_ctrl_stack_type(x));
+
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(lhs)));
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(rhs)));
+    }
+
     pub fn sum_kw_rule(&mut self){
         let n1 = get_num_value(self.pop_value().unwrap());
         let n2 = get_num_value(self.pop_value().unwrap());
         let result = n1 + n2;
+
+        self.push_value(num(result));
+    }
+
+    pub fn sub_kw_rule(&mut self){
+        let n1 = get_num_value(self.pop_value().unwrap());
+        let n2 = get_num_value(self.pop_value().unwrap());
+        let result = n1 - n2;
+
+        self.push_value(num(result));
+    }
+
+    pub fn mul_kw_rule(&mut self){
+        let n1 = get_num_value(self.pop_value().unwrap());
+        let n2 = get_num_value(self.pop_value().unwrap());
+        let result = n1 * n2;
+
+        self.push_value(num(result));
+    }
+
+    pub fn div_kw_rule(&mut self){
+        let n1 = get_num_value(self.pop_value().unwrap());
+        let n2 = get_num_value(self.pop_value().unwrap());
+        let result = n1 / n2;
 
         self.push_value(num(result));
     }
@@ -135,6 +183,9 @@ pub fn eval_aexp_aut(aexp: ArithExp, mut aut: PiAut) -> PiAut{
     match aexp{
         ArithExp::Num{value} => aut.push_value(num(value)),
         ArithExp::Sum{lhs,rhs} => aut.sum_rule(lhs,rhs),
+        ArithExp::Sub{lhs,rhs} => aut.sub_rule(lhs,rhs),
+        ArithExp::Mul{lhs,rhs} => aut.mul_rule(lhs,rhs),
+        ArithExp::Div{lhs,rhs} => aut.div_rule(lhs,rhs),
         _ => unreachable!(),
     }
     aut
@@ -151,6 +202,9 @@ pub fn eval_exp_aut(expression: Exp,mut aut: PiAut) -> PiAut{
 pub fn eval_kw_aut(keyword: KW,mut aut: PiAut) -> PiAut{
     match keyword{
         KW::KWSum => aut.sum_kw_rule(),
+        KW::KWSub => aut.sub_kw_rule(),
+        KW::KWMul => aut.mul_kw_rule(),
+        KW::KWDiv => aut.div_kw_rule(),
         _ => unreachable!(),
     }
     aut
