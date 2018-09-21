@@ -82,8 +82,8 @@ fn main() {
             Ok(calc) => println!("= {:?}", eval(calc)),
             Err(_) => println!(" Syntax error"),
         }
-        let result = Box::leak(sum(num(3.0), num(2.0)));
-        piinterpreter::eval_tree(result);
+        let result = (sum(num(3.0), num(2.0)));
+        piinterpreter::eval_tree(*result);
         print_input_message();
     }
 }
