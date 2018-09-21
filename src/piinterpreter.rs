@@ -76,7 +76,7 @@ pub enum Ctrl_stack_type{
 
 pub struct PiAut{
     control_stack: LinkedList<Box<Ctrl_stack_type>>,
-    value_stack: LinkedList<Box<ArithExp>>,
+    value_stack: LinkedList<Box<Exp>>,
 }
 
 impl PiAut{
@@ -92,11 +92,11 @@ impl PiAut{
         self.control_stack.pop_front()
     }
 
-    pub fn push_value(&mut self,x: Box<ArithExp>){
+    pub fn push_value(&mut self,x: Box<Exp>){
         self.value_stack.push_front(x);
     }
 
-    pub fn pop_value(&mut self) -> Option<Box<ArithExp>>{
+    pub fn pop_value(&mut self) -> Option<Box<Exp>>{
         self.value_stack.pop_front()
     }
 
@@ -151,7 +151,7 @@ impl PiAut{
         let n2 = get_num_value(self.pop_value().unwrap());
         let result = n1 + n2;
 
-        self.push_value(num(result));
+        self.push_value(arithExp_as_exp(num(result)));
     }
 
     pub fn sub_kw_rule(&mut self){
@@ -159,7 +159,7 @@ impl PiAut{
         let n2 = get_num_value(self.pop_value().unwrap());
         let result = n1 - n2;
 
-        self.push_value(num(result));
+        self.push_value(arithExp_as_exp(num(result)));
     }
 
     pub fn mul_kw_rule(&mut self){
@@ -167,7 +167,7 @@ impl PiAut{
         let n2 = get_num_value(self.pop_value().unwrap());
         let result = n1 * n2;
 
-        self.push_value(num(result));
+        self.push_value(arithExp_as_exp(num(result)));
     }
 
     pub fn div_kw_rule(&mut self){
@@ -175,13 +175,13 @@ impl PiAut{
         let n2 = get_num_value(self.pop_value().unwrap());
         let result = n1 / n2;
 
-        self.push_value(num(result));
+        self.push_value(arithExp_as_exp(num(result)));
     }
 }
 
 pub fn eval_aexp_aut(aexp: ArithExp, mut aut: PiAut) -> PiAut{
     match aexp{
-        ArithExp::Num{value} => aut.push_value(num(value)),
+        ArithExp::Num{value} => aut.push_value(arithExp_as_exp(num(value))),
         ArithExp::Sum{lhs,rhs} => aut.sum_rule(lhs,rhs),
         ArithExp::Sub{lhs,rhs} => aut.sub_rule(lhs,rhs),
         ArithExp::Mul{lhs,rhs} => aut.mul_rule(lhs,rhs),
@@ -191,9 +191,18 @@ pub fn eval_aexp_aut(aexp: ArithExp, mut aut: PiAut) -> PiAut{
     aut
 }
 
+pub fn eval_bexp_aut(bexp: BoolExp, mut aut: PiAut) -> PiAut{
+    match bexp{
+        BoolExp::Bool{value} => aut.push_value(boolExp_as_exp(boolean(value))),
+        _ => unreachable!(),
+    }
+    aut
+}
+
 pub fn eval_exp_aut(expression: Exp,mut aut: PiAut) -> PiAut{
     match expression{
         Exp::ArithExp(aexp) => aut = eval_aexp_aut(aexp,aut),
+        Exp::BoolExp(bexp) => aut = eval_bexp_aut(bexp,aut),
         _ => unreachable!(),
     }
     aut
@@ -217,7 +226,6 @@ pub fn eval_automata(mut aut: PiAut) -> PiAut{
         match *tree.unwrap(){
             Ctrl_stack_type::Exp(exp) => aut = eval_exp_aut(exp,aut),
             Ctrl_stack_type::KW(kw) => aut = eval_kw_aut(kw,aut),
-
             _ => unreachable!(),
         }
     }
@@ -264,8 +272,14 @@ pub fn or(lhs: Box<BoolExp>, rhs: Box<BoolExp>) -> Box<BoolExp>{
     Box::new(BoolExp::Or { lhs, rhs })
 }
 
-pub fn get_num_value(num: Box<ArithExp>) -> f64 {
+//pub fn get_num_value(num: Box<ArithExp>) -> f64 {
+pub fn get_num_value(num: Box<Exp>) -> f64 {
+    let mut x: ArithExp;
     match *num {
+        Exp::ArithExp(aexp) => x = aexp,
+        _ => unreachable!(),
+    }
+    match x{
         ArithExp::Num{value} => value,
         _ => unreachable!(),
     }

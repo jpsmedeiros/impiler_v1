@@ -98,7 +98,7 @@ fn print_aut(result: Box<Exp>){
     let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
     match *result {
         Exp::ArithExp(arithExp) => aut.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(Box::new(arithExp)))),
-        Exp::BoolExp(boolExp)  => println!("TODO automato para expressões booleanas"),
+        Exp::BoolExp(boolExp)  => aut.push_ctrl(exp_as_ctrl_stack_type(boolExp_as_exp(Box::new(boolExp)))),
         _ => unreachable!()
     }
     aut = eval_automata(aut);
@@ -110,22 +110,6 @@ fn print_aut(result: Box<Exp>){
 }
 
 fn main() {
-
-    /*
-    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
-    aut.push_ctrl(num(5.0));
-    aut.push_ctrl(num(2.0));
-
-    aut = eval_automata(aut);
-    aut.print_value();
-    */
-    /*
-    println!("____________");
-    aut = eval_automata(aut);
-    aut.print_ctrl();
-    aut.print_value();
-    */
-
 
     print_input_message();
     let stdin = std::io::stdin();
