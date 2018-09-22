@@ -38,7 +38,7 @@ pub enum ArithExp{
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum BoolExp{
     Eq {
         lhs: Box<BoolExp>,

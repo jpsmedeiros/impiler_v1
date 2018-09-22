@@ -54,8 +54,6 @@ fn transform_arith(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::Ar
 }
 
 fn transform_bool(pair: Pair<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
-    println!("Bool Expression = {}", pair);
-
     let mut lhs: std::boxed::Box<piinterpreter::BoolExp> = boolean(false);
     let mut lhsblock: bool = false;
     let mut rhs: std::boxed::Box<piinterpreter::BoolExp> = boolean(false);
@@ -68,11 +66,16 @@ fn transform_bool(pair: Pair<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
     let mut x = 0;
 
     while x < length {
-        println!("X ATUAL = {}", x);
         p = pairs.next().unwrap();
-        println!("Regra atual = {}", p.as_str());
         match p.as_rule(){
-            //Rule::bexp => transform_bool(p),
+            Rule::bexp => {
+                if !lhsblock {
+                    lhs = transform_bool(p);
+                }else{
+                    rhs = transform_bool(p);
+                }
+                x = x + 1;
+            },
             Rule::boolean => {
                 if !lhsblock {
                     lhs = boolean(bool_value(p));
@@ -83,19 +86,73 @@ fn transform_bool(pair: Pair<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
                 x = x + 1;
             },
             Rule::and => {
-                println!("pegando proximo valor");
-                rhs = boolean(bool_value(pairs.next().unwrap())); // se for and devemos pegar o próximo valor
-                println!("Peguei proximo valor");
+                let mut next_pair = pairs.next().unwrap();
+                match next_pair.as_rule() { // se for and devemos pegar o próximo valor
+                    Rule::neg => {
+                        next_pair = pairs.next().unwrap();
+                        rhs = neg(transform_bool_for_op(next_pair));
+                        x = x + 1;
+                    },
+                    _ => {
+                        rhs = transform_bool_for_op(next_pair);
+                    },
+                } 
                 x = x + 2;
-                lhs = and(lhs, rhs);
+                lhs = and(lhs, rhs.clone());
                 lhsblock = false;
             },
-            // Rule::or => println!("Or = {}", p.as_str()),
+            Rule::neg => {
+                let mut next_pair = pairs.next().unwrap(); // se for neg devemos pegar o próximo valor
+                rhs = transform_bool_for_op(next_pair);
+                lhs = neg(rhs);
+                lhsblock = false;
+                x = x + 2;
+            }
+            Rule::or => {
+                let mut next_pair = pairs.next().unwrap();
+                match next_pair.as_rule() { // se for or devemos pegar o próximo valor
+                    Rule::neg => {
+                        next_pair = pairs.next().unwrap();
+                        rhs = neg(transform_bool_for_op(next_pair));
+                        x = x + 1;
+                    },
+                    _ => {
+                        rhs = transform_bool_for_op(next_pair);
+                    },
+                } 
+                x = x + 2;
+                lhs = or(lhs, rhs.clone());
+                lhsblock = false;
+            },
+            Rule::equal => {
+                let mut next_pair = pairs.next().unwrap();
+                match next_pair.as_rule() { // se for or devemos pegar o próximo valor
+                    Rule::neg => {
+                        next_pair = pairs.next().unwrap();
+                        rhs = neg(transform_bool_for_op(next_pair));
+                        x = x + 1;
+                    },
+                    _ => {
+                        rhs = transform_bool_for_op(next_pair);
+                    },
+                } 
+                x = x + 2;
+                lhs = eq(lhs, rhs.clone());
+                lhsblock = false;
+            },
             _ => unreachable!(),
         }
     }
     result = lhs;
     result
+}
+
+fn transform_bool_for_op(pair: Pair<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
+    match pair.as_rule() { // se for and devemos pegar o próximo valor
+        Rule::bexp => transform_bool(pair), // é uma bexp, deve ser avaliado pelo transform_bool
+        Rule::boolean => boolean(bool_value(pair)),
+        _ => unreachable!(),
+    } 
 }
 
 fn bool_value(pair: Pair<Rule>) -> bool {
@@ -104,8 +161,7 @@ fn bool_value(pair: Pair<Rule>) -> bool {
 
 fn transform(pair: Pair<Rule>) -> Box<Exp> {
     match pair.as_rule() {
-       //Rule::aexp => arithExp_as_exp(transform_arith(pair.into_inner())),
-       //Rule::bexp => boolExp_as_exp(transform_bool(pair.into_inner())),
+       Rule::aexp => arithExp_as_exp(transform_arith(pair.into_inner())),
        Rule::bexp => boolExp_as_exp(transform_bool(pair)),
        _ => unreachable!()
     }
@@ -143,7 +199,7 @@ fn main() {
                 let enclosed = pairs.next().unwrap();
                 let pilib_result = transform(enclosed);
                 println!("Result = {:?}", pilib_result);
-                // print_aut(pilib_result);
+                print_aut(pilib_result);
             },
             Err(_) => println!(" Syntax error"),
         }
