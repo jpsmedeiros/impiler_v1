@@ -45,12 +45,12 @@ lazy_static! { //declare lazy evaluated static
     };
 }
 
-fn eval_arith(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::ArithExp> {
+fn transform_arith(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::ArithExp> {
     MATH_CLIMBER.climb(
        expression,
        |pair: Pair<Rule>| match pair.as_rule() {
            Rule::num => num(pair.as_str().parse::<f64>().unwrap()),
-           Rule::aexp => eval_arith(pair.into_inner()),
+           Rule::aexp => transform_arith(pair.into_inner()),
            _ => unreachable!(),
        },
        |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
@@ -63,13 +63,13 @@ fn eval_arith(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::ArithEx
    )
 }
 
-fn eval_bool(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
+fn transform_bool(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
     println!("Bool Expression = {}", expression);
     BOOL_CLIMBER.climb(
         expression,
         |pair: Pair<Rule>| match pair.as_rule(){
             Rule::boolean => boolean(pair.as_str().parse::<bool>().unwrap()),
-            Rule::bexp => eval_bool(pair.into_inner()),
+            Rule::bexp => transform_bool(pair.into_inner()),
             //Rule::neg => neg(boolean(pair.into_inner().as_str().parse::<bool>().unwrap())),
             _ => unreachable!(),
         },
@@ -82,10 +82,10 @@ fn eval_bool(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::BoolExp>
     )
 }
 
-fn eval(pair: Pair<Rule>) -> Box<Exp> {
+fn transform(pair: Pair<Rule>) -> Box<Exp> {
     match pair.as_rule() {
-       Rule::aexp => arithExp_as_exp(eval_arith(pair.into_inner())),
-       Rule::bexp => boolExp_as_exp(eval_bool(pair.into_inner())),
+       Rule::aexp => arithExp_as_exp(transform_arith(pair.into_inner())),
+       Rule::bexp => boolExp_as_exp(transform_bool(pair.into_inner())),
        _ => unreachable!()
     }
 }
@@ -120,7 +120,7 @@ fn main() {
         match parse_result {
             Ok(mut pairs) => {
                 let enclosed = pairs.next().unwrap();
-                let pilib_result = eval(enclosed);
+                let pilib_result = transform(enclosed);
                 println!("Result = {:?}", pilib_result);
                 print_aut(pilib_result);
             },
