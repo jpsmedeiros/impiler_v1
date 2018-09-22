@@ -33,16 +33,6 @@ lazy_static! { //declare lazy evaluated static
             Operator::new(multiply, Left) | Operator::new(divide, Left)
         ])
     };
-    static ref BOOL_CLIMBER: PrecClimber<Rule> = {
-        use Rule::*;
-        use Assoc::*;
-
-        PrecClimber::new(vec![
-            Operator::new(equal, Left),
-            Operator::new(and, Left) | Operator::new(or, Left),
-            Operator::new(neg, Right)
-        ])
-    };
 }
 
 fn transform_arith(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::ArithExp> {
@@ -63,29 +53,60 @@ fn transform_arith(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::Ar
    )
 }
 
-fn transform_bool(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
-    println!("Bool Expression = {}", expression);
-    BOOL_CLIMBER.climb(
-        expression,
-        |pair: Pair<Rule>| match pair.as_rule(){
-            Rule::boolean => boolean(pair.as_str().parse::<bool>().unwrap()),
-            Rule::bexp => transform_bool(pair.into_inner()),
-            //Rule::neg => neg(boolean(pair.into_inner().as_str().parse::<bool>().unwrap())),
-            _ => unreachable!(),
-        },
-        |lhs, op: Pair<Rule>, rhs | match op.as_rule(){
-            Rule::equal => eq(lhs, rhs),
-            Rule::and   => and(lhs, rhs),
-            Rule::or    => or(lhs, rhs),
+fn transform_bool(pair: Pair<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
+    println!("Bool Expression = {}", pair);
+
+    let mut lhs: std::boxed::Box<piinterpreter::BoolExp> = boolean(false);
+    let mut lhsblock: bool = false;
+    let mut rhs: std::boxed::Box<piinterpreter::BoolExp> = boolean(false);
+
+    let mut result: std::boxed::Box<piinterpreter::BoolExp>;
+
+    let mut pairs = pair.clone().into_inner();
+    let length = pair.into_inner().count();
+    let mut p: Pair<Rule>;
+    let mut x = 0;
+
+    while x < length {
+        println!("X ATUAL = {}", x);
+        p = pairs.next().unwrap();
+        println!("Regra atual = {}", p.as_str());
+        match p.as_rule(){
+            //Rule::bexp => transform_bool(p),
+            Rule::boolean => {
+                if !lhsblock {
+                    lhs = boolean(bool_value(p));
+                    lhsblock = true;
+                }else{
+                    rhs = boolean(bool_value(p));
+                }
+                x = x + 1;
+            },
+            Rule::and => {
+                println!("pegando proximo valor");
+                rhs = boolean(bool_value(pairs.next().unwrap())); // se for and devemos pegar o próximo valor
+                println!("Peguei proximo valor");
+                x = x + 2;
+                lhs = and(lhs, rhs);
+                lhsblock = false;
+            },
+            // Rule::or => println!("Or = {}", p.as_str()),
             _ => unreachable!(),
         }
-    )
+    }
+    result = lhs;
+    result
+}
+
+fn bool_value(pair: Pair<Rule>) -> bool {
+    pair.as_str().parse::<bool>().unwrap()
 }
 
 fn transform(pair: Pair<Rule>) -> Box<Exp> {
     match pair.as_rule() {
-       Rule::aexp => arithExp_as_exp(transform_arith(pair.into_inner())),
-       Rule::bexp => boolExp_as_exp(transform_bool(pair.into_inner())),
+       //Rule::aexp => arithExp_as_exp(transform_arith(pair.into_inner())),
+       //Rule::bexp => boolExp_as_exp(transform_bool(pair.into_inner())),
+       Rule::bexp => boolExp_as_exp(transform_bool(pair)),
        _ => unreachable!()
     }
 }
@@ -122,7 +143,7 @@ fn main() {
                 let enclosed = pairs.next().unwrap();
                 let pilib_result = transform(enclosed);
                 println!("Result = {:?}", pilib_result);
-                print_aut(pilib_result);
+                // print_aut(pilib_result);
             },
             Err(_) => println!(" Syntax error"),
         }
