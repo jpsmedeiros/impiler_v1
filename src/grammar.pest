@@ -17,7 +17,7 @@ boolop = _{ equal | and | or }
     or    = { "\u{005C}/"}
 
     
-iop = _{ greater_than | greater_equal | less_than | less_equal }
+iop = _{ greater_equal | less_equal | greater_than | less_than  }
     greater_than  = { ">" }
     greater_equal = { ">=" }
     less_than     = { "<" }
@@ -25,10 +25,10 @@ iop = _{ greater_than | greater_equal | less_than | less_equal }
 
 neg   = { "~" }
 
-exp = _{ aexp | bexp }
+exp = _{ bexp | aexp }
 aexp = { aterm ~ (arithop ~ aterm)* }
 
-bexp = { bterm ~ (boolop ~ bterm)*}
+bexp = { bterm ~ (boolop ~ bterm)* | aexp ~ iop ~ aexp }
 
 aterm = _{ num | "(" ~ aexp ~ ")" | id}
 bterm = _{ boolean | "(" ~ bexp ~ ")" | neg ~ bterm }

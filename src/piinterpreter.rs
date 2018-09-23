@@ -15,7 +15,7 @@ pub enum Exp{
     BoolExp(BoolExp),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ArithExp{
     Sum{
         lhs: Box<ArithExp>,
@@ -57,6 +57,22 @@ pub enum BoolExp{
     },
     Bool {
         value: bool
+    },
+    Gt {
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
+    },
+    Ge {
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
+    },
+    Lt {
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
+    },
+    Le {
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
     }
 }
 
@@ -335,6 +351,22 @@ pub fn or(lhs: Box<BoolExp>, rhs: Box<BoolExp>) -> Box<BoolExp>{
     Box::new(BoolExp::Or { lhs, rhs })
 }
 
+pub fn gt(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<BoolExp>{
+    Box::new(BoolExp::Gt { lhs, rhs })
+}
+
+pub fn ge(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<BoolExp>{
+    Box::new(BoolExp::Ge { lhs, rhs })
+}
+
+pub fn lt(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<BoolExp>{
+    Box::new(BoolExp::Lt { lhs, rhs })
+}
+
+pub fn le(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<BoolExp>{
+    Box::new(BoolExp::Le { lhs, rhs })
+}
+
 //pub fn get_num_value(num: Box<ArithExp>) -> f64 {
 pub fn get_num_value(num: Box<Exp>) -> f64 {
     let mut x: ArithExp;
@@ -375,6 +407,20 @@ pub fn exp_as_ctrl_stack_type(expression: Box<Exp>) -> Box<Ctrl_stack_type>{
 
 pub fn kw_as_ctrl_stack_type(keyword: Box<KW>) -> Box<Ctrl_stack_type>{
     Box::new(Ctrl_stack_type::KW(*keyword))
+}
+
+pub fn exp_as_arithExp(expression: Box<Exp>) -> Box<ArithExp> {
+    match *expression{
+        Exp::ArithExp(aexp) => Box::new(aexp),
+        _ => unreachable!(),
+    }
+}
+
+pub fn exp_as_boolExp(expression: Box<Exp>) -> Box<BoolExp> {
+    match *expression{
+        Exp::BoolExp(bexp) => Box::new(bexp),
+        _ => unreachable!(),
+    }
 }
 
 
