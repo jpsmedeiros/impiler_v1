@@ -9,13 +9,13 @@ pub enum Statement{
     Exp,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Exp{
     ArithExp(ArithExp),
     BoolExp(BoolExp),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ArithExp{
     Sum{
         lhs: Box<ArithExp>,
@@ -38,7 +38,7 @@ pub enum ArithExp{
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BoolExp{
     Eq {
         lhs: Box<BoolExp>,
