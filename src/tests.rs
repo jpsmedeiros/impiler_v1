@@ -103,7 +103,7 @@ fn test_parser_iop_4() {
 #[test]
 fn test_parser_iop_5() {
     let result = parser::parse_expression("(3*2) > 5+1".to_owned());
-    let expected = piinterpreter::boolExp_as_exp(gt(mul(num(3.0), num(2.0)), sum(num(4.0), num(1.0))));
+    let expected = piinterpreter::boolExp_as_exp(gt(mul(num(3.0), num(2.0)), sum(num(5.0), num(1.0))));
     assert_eq!(result, expected);
 }
 
