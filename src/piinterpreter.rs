@@ -6,7 +6,8 @@ use std::collections::LinkedList;
 use std::option::Option;
 
 pub enum Statement{
-    Exp,
+    Cmd(Cmd),
+    Exp(Exp),
 }
 
 #[derive(Debug, PartialEq)]
@@ -74,6 +75,21 @@ pub enum BoolExp{
         lhs: Box<ArithExp>,
         rhs: Box<ArithExp>
     }
+}
+
+pub enum Cmd{
+    Assign {
+        id: Id,
+        value: Box<Exp>
+    },
+    While {
+        boolExp: Box<BoolExp>,
+        cmd: Box<Cmd>
+    }
+}
+
+pub struct Id {
+    value: String
 }
 
 #[derive(Debug)]

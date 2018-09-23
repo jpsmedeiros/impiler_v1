@@ -221,7 +221,7 @@ pub fn parse(){
         let line = line.unwrap();
         let pilib_result = parse_expression(line);
         println!("PI-LIB = {:?}", pilib_result);
-        print_aut(pilib_result);
+        //print_aut(pilib_result);
         print_input_message();
     }
 
@@ -232,6 +232,7 @@ pub fn parse_expression(expression: String) -> Box<piinterpreter::Exp> {
     match parse_result {
         Ok(mut pairs) => {
             let enclosed = pairs.next().unwrap();
+            println!("Enclosed = {:?}", enclosed);
             transform(enclosed)
         },
         Err(_) => {

@@ -41,8 +41,11 @@ id      =  {
 
 cmd = { cmdterm ~ ";" ~ cmd | cmdterm}
 
-cmdterm = _{ id ~ ":=" ~ exp |  "while" ~ "(" ~ bexp ~ ")" ~ "do" ~ "{" ~ cmd ~ "}"}
+cmdterm = _{ assign_cmd |  while_cmd}
 
-impiler = _{ soi ~ (exp | cmd) ~ eoi }
+assign_cmd = { id ~ ":=" ~ exp }
+while_cmd = { "while" ~ "(" ~ bexp ~ ")" ~ "do" ~ "{" ~ cmd ~ "}" }
+
+impiler = _{ soi ~ (cmd | exp) ~ eoi }
 
 whitespace = _{ " " | "\t" }
