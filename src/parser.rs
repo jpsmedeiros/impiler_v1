@@ -221,7 +221,11 @@ pub fn parse(){
         let line = line.unwrap();
         let pilib_result = parse_expression(line);
         println!("PI-LIB = {:?}", pilib_result);
+<<<<<<< HEAD
         //print_aut(pilib_result); IMPLEMENTAR AUTOMATO PARA IOP
+=======
+        print_aut(pilib_result);
+>>>>>>> aa5f5fbf8c6abe94b009e8d1fa53572288f3bc69
         print_input_message();
     }
 
