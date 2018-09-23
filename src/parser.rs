@@ -185,7 +185,7 @@ pub fn parse(){
         let line = line.unwrap();
         let pilib_result = parse_expression(line);
         println!("PI-LIB = {:?}", pilib_result);
-        //print_aut(pilib_result);
+        print_aut(pilib_result);
         print_input_message();
     }
 

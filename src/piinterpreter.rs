@@ -69,6 +69,7 @@ pub enum KW{
     KWAnd,
     KWOr,
     KWEq,
+    KWNeg
 }
 
 #[derive(Debug)]
@@ -173,6 +174,13 @@ impl PiAut{
         self.push_ctrl(exp_as_ctrl_stack_type(boolExp_as_exp(rhs)));
     }
 
+    pub fn neg_rule(&mut self, value:Box<BoolExp>){
+        let x = Box::new(KW::KWNeg);
+        self.push_ctrl(kw_as_ctrl_stack_type(x));
+
+        self.push_ctrl(exp_as_ctrl_stack_type(boolExp_as_exp(value)));
+    }
+
     pub fn sum_kw_rule(&mut self){
         let n1 = get_num_value(self.pop_value().unwrap());
         let n2 = get_num_value(self.pop_value().unwrap());
@@ -234,6 +242,14 @@ impl PiAut{
         self.push_value(boolExp_as_exp(boolean(result)));
     }
 
+    pub fn neg_kw_rule(&mut self){
+        let n = get_bool_value(self.pop_value().unwrap());
+        let mut result:bool;
+        result = !n;
+        
+        self.push_value(boolExp_as_exp(boolean(result)));
+    }
+
 }
 
 pub fn eval_aexp_aut(aexp: ArithExp, mut aut: PiAut) -> PiAut{
@@ -254,6 +270,7 @@ pub fn eval_bexp_aut(bexp: BoolExp, mut aut: PiAut) -> PiAut{
         BoolExp::And{lhs,rhs} => aut.and_rule(lhs,rhs),
         BoolExp::Or{lhs,rhs} => aut.or_rule(lhs,rhs),
         BoolExp::Eq{lhs,rhs} => aut.eq_rule(lhs,rhs),
+        BoolExp::Neg{value} => aut.neg_rule(value),
         _ => unreachable!(),
     }
     aut
@@ -277,6 +294,7 @@ pub fn eval_kw_aut(keyword: KW,mut aut: PiAut) -> PiAut{
         KW::KWAnd => aut.and_kw_rule(),
         KW::KWOr => aut.or_kw_rule(),
         KW::KWEq => aut.eq_kw_rule(),
+        KW::KWNeg => aut.neg_kw_rule(),
         _ => unreachable!(),
     }
     aut
