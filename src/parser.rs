@@ -45,9 +45,9 @@ fn transform_arith(expression: Pairs<Rule>) -> std::boxed::Box<piinterpreter::Ar
 }
 
 fn transform_bool(pair: Pair<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
-    let mut lhs: std::boxed::Box<piinterpreter::BoolExp> = piinterpreter::boolean(false);
+    let mut lhs: std::boxed::Box<piinterpreter::Exp> = piinterpreter::boolExp_as_exp(piinterpreter::boolean(false));
     let mut lhsblock: bool = false;
-    let mut rhs: std::boxed::Box<piinterpreter::BoolExp> = piinterpreter::boolean(false);
+    let mut rhs: std::boxed::Box<piinterpreter::Exp> = piinterpreter::boolExp_as_exp(piinterpreter::boolean(false));
 
     let mut result: std::boxed::Box<piinterpreter::BoolExp>;
 
@@ -55,24 +55,32 @@ fn transform_bool(pair: Pair<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
     let length = pair.into_inner().count();
     let mut p: Pair<Rule>;
     let mut x = 0;
-
+    println!("Boolean Expression = {:?}", pairs);
     while x < length {
         p = pairs.next().unwrap();
         match p.as_rule(){
             Rule::bexp => {
                 if !lhsblock {
-                    lhs = transform_bool(p);
+                    lhs = piinterpreter::boolExp_as_exp(transform_bool(p));
                 }else{
-                    rhs = transform_bool(p);
+                    rhs = piinterpreter::boolExp_as_exp(transform_bool(p));
+                }
+                x = x + 1;
+            },
+            Rule::aexp => {
+                if !lhsblock {
+                    lhs = piinterpreter::arithExp_as_exp(transform_arith(p.into_inner()));
+                }else{
+                    rhs = piinterpreter::arithExp_as_exp(transform_arith(p.into_inner()));
                 }
                 x = x + 1;
             },
             Rule::boolean => {
                 if !lhsblock {
-                    lhs = piinterpreter::boolean(bool_value(p));
+                    lhs = piinterpreter::boolExp_as_exp(piinterpreter::boolean(bool_value(p)));
                     lhsblock = true;
                 }else{
-                    rhs = piinterpreter::boolean(bool_value(p));
+                    rhs = piinterpreter::boolExp_as_exp(piinterpreter::boolean(bool_value(p)));
                 }
                 x = x + 1;
             },
@@ -81,21 +89,21 @@ fn transform_bool(pair: Pair<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
                 match next_pair.as_rule() { // se for and devemos pegar o próximo valor
                     Rule::neg => {
                         next_pair = pairs.next().unwrap();
-                        rhs = piinterpreter::neg(transform_bool_for_op(next_pair));
+                        rhs = piinterpreter::boolExp_as_exp(piinterpreter::neg(transform_bool_for_op(next_pair)));
                         x = x + 1;
                     },
                     _ => {
-                        rhs = transform_bool_for_op(next_pair);
+                        rhs = piinterpreter::boolExp_as_exp(transform_bool_for_op(next_pair));
                     },
                 } 
                 x = x + 2;
-                lhs = piinterpreter::and(lhs, rhs.clone());
+                lhs = piinterpreter::boolExp_as_exp(piinterpreter::and(piinterpreter::exp_as_boolExp(lhs), piinterpreter::exp_as_boolExp(rhs)));
                 lhsblock = false;
             },
             Rule::neg => {
                 let mut next_pair = pairs.next().unwrap(); // se for neg devemos pegar o próximo valor
-                rhs = transform_bool_for_op(next_pair);
-                lhs = piinterpreter::neg(rhs);
+                rhs = piinterpreter::boolExp_as_exp(transform_bool_for_op(next_pair));
+                lhs = piinterpreter::boolExp_as_exp(piinterpreter::neg(piinterpreter::exp_as_boolExp(rhs)));
                 lhsblock = false;
                 x = x + 2;
             }
@@ -104,15 +112,15 @@ fn transform_bool(pair: Pair<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
                 match next_pair.as_rule() { // se for or devemos pegar o próximo valor
                     Rule::neg => {
                         next_pair = pairs.next().unwrap();
-                        rhs = piinterpreter::neg(transform_bool_for_op(next_pair));
+                        rhs = piinterpreter::boolExp_as_exp(piinterpreter::neg(transform_bool_for_op(next_pair)));
                         x = x + 1;
                     },
                     _ => {
-                        rhs = transform_bool_for_op(next_pair);
+                        rhs = piinterpreter::boolExp_as_exp(transform_bool_for_op(next_pair));
                     },
                 } 
                 x = x + 2;
-                lhs = piinterpreter::or(lhs, rhs.clone());
+                lhs = piinterpreter::boolExp_as_exp(piinterpreter::or(piinterpreter::exp_as_boolExp(lhs), piinterpreter::exp_as_boolExp(rhs)));
                 lhsblock = false;
             },
             Rule::equal => {
@@ -120,21 +128,49 @@ fn transform_bool(pair: Pair<Rule>) -> std::boxed::Box<piinterpreter::BoolExp> {
                 match next_pair.as_rule() { // se for or devemos pegar o próximo valor
                     Rule::neg => {
                         next_pair = pairs.next().unwrap();
-                        rhs = piinterpreter::neg(transform_bool_for_op(next_pair));
+                        rhs = piinterpreter::boolExp_as_exp(piinterpreter::neg(transform_bool_for_op(next_pair)));
                         x = x + 1;
                     },
                     _ => {
-                        rhs = transform_bool_for_op(next_pair);
+                        rhs = piinterpreter::boolExp_as_exp(transform_bool_for_op(next_pair));
                     },
                 } 
                 x = x + 2;
-                lhs = piinterpreter::eq(lhs, rhs.clone());
+                lhs = piinterpreter::boolExp_as_exp(piinterpreter::eq(piinterpreter::exp_as_boolExp(lhs), piinterpreter::exp_as_boolExp(rhs)));
                 lhsblock = false;
+            },
+            Rule::greater_than => {
+                let mut next_pair = pairs.next().unwrap();
+                rhs = piinterpreter::arithExp_as_exp(transform_arith(next_pair.into_inner()));
+                lhs = piinterpreter::boolExp_as_exp(piinterpreter::gt(piinterpreter::exp_as_arithExp(lhs), piinterpreter::exp_as_arithExp(rhs)));
+                lhsblock = false;
+                x = x + 2;
+            },
+            Rule::greater_equal => {
+                let mut next_pair = pairs.next().unwrap();
+                rhs = piinterpreter::arithExp_as_exp(transform_arith(next_pair.into_inner()));
+                lhs = piinterpreter::boolExp_as_exp(piinterpreter::ge(piinterpreter::exp_as_arithExp(lhs), piinterpreter::exp_as_arithExp(rhs)));
+                lhsblock = false;
+                x = x + 2;
+            },
+            Rule::less_than => {
+                let mut next_pair = pairs.next().unwrap();
+                rhs = piinterpreter::arithExp_as_exp(transform_arith(next_pair.into_inner()));
+                lhs = piinterpreter::boolExp_as_exp(piinterpreter::lt(piinterpreter::exp_as_arithExp(lhs), piinterpreter::exp_as_arithExp(rhs)));
+                lhsblock = false;
+                x = x + 2;
+            },
+            Rule::less_equal => {
+                let mut next_pair = pairs.next().unwrap();
+                rhs = piinterpreter::arithExp_as_exp(transform_arith(next_pair.into_inner()));
+                lhs = piinterpreter::boolExp_as_exp(piinterpreter::le(piinterpreter::exp_as_arithExp(lhs), piinterpreter::exp_as_arithExp(rhs)));
+                lhsblock = false;
+                x = x + 2;
             },
             _ => unreachable!(),
         }
     }
-    result = lhs;
+    result = piinterpreter::exp_as_boolExp(lhs);
     result
 }
 
@@ -185,7 +221,7 @@ pub fn parse(){
         let line = line.unwrap();
         let pilib_result = parse_expression(line);
         println!("PI-LIB = {:?}", pilib_result);
-        //print_aut(pilib_result);
+        print_aut(pilib_result);
         print_input_message();
     }
 

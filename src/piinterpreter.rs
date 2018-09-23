@@ -15,7 +15,7 @@ pub enum Exp{
     BoolExp(BoolExp),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ArithExp{
     Sum{
         lhs: Box<ArithExp>,
@@ -57,6 +57,22 @@ pub enum BoolExp{
     },
     Bool {
         value: bool
+    },
+    Gt {
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
+    },
+    Ge {
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
+    },
+    Lt {
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
+    },
+    Le {
+        lhs: Box<ArithExp>,
+        rhs: Box<ArithExp>
     }
 }
 
@@ -69,6 +85,11 @@ pub enum KW{
     KWAnd,
     KWOr,
     KWEq,
+    KWNeg,
+    KWGt,
+    KWGe,
+    KWLt,
+    KWLe
 }
 
 #[derive(Debug)]
@@ -173,6 +194,45 @@ impl PiAut{
         self.push_ctrl(exp_as_ctrl_stack_type(boolExp_as_exp(rhs)));
     }
 
+    pub fn neg_rule(&mut self, value:Box<BoolExp>){
+        let x = Box::new(KW::KWNeg);
+        self.push_ctrl(kw_as_ctrl_stack_type(x));
+
+        self.push_ctrl(exp_as_ctrl_stack_type(boolExp_as_exp(value)));
+    }
+
+    pub fn gt_rule(&mut self, lhs:Box<ArithExp>, rhs:Box<ArithExp>){
+        let x = Box::new(KW::KWGt);
+        self.push_ctrl(kw_as_ctrl_stack_type(x));
+
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(lhs)));
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(rhs)));
+    }
+
+    pub fn ge_rule(&mut self, lhs:Box<ArithExp>, rhs:Box<ArithExp>){
+        let x = Box::new(KW::KWGe);
+        self.push_ctrl(kw_as_ctrl_stack_type(x));
+
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(lhs)));
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(rhs)));
+    }
+
+    pub fn lt_rule(&mut self, lhs:Box<ArithExp>, rhs:Box<ArithExp>){
+        let x = Box::new(KW::KWLt);
+        self.push_ctrl(kw_as_ctrl_stack_type(x));
+
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(lhs)));
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(rhs)));
+    }
+
+    pub fn le_rule(&mut self, lhs:Box<ArithExp>, rhs:Box<ArithExp>){
+        let x = Box::new(KW::KWLe);
+        self.push_ctrl(kw_as_ctrl_stack_type(x));
+
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(lhs)));
+        self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(rhs)));
+    }
+
     pub fn sum_kw_rule(&mut self){
         let n1 = get_num_value(self.pop_value().unwrap());
         let n2 = get_num_value(self.pop_value().unwrap());
@@ -234,6 +294,46 @@ impl PiAut{
         self.push_value(boolExp_as_exp(boolean(result)));
     }
 
+    pub fn gt_kw_rule(&mut self){
+        let n1 = get_num_value(self.pop_value().unwrap());
+        let n2 = get_num_value(self.pop_value().unwrap());
+        let result = n1 > n2;
+
+        self.push_value(boolExp_as_exp(boolean(result)));
+    }
+
+    pub fn ge_kw_rule(&mut self){
+        let n1 = get_num_value(self.pop_value().unwrap());
+        let n2 = get_num_value(self.pop_value().unwrap());
+        let result = n1 >= n2;
+
+        self.push_value(boolExp_as_exp(boolean(result)));
+    }
+
+    pub fn lt_kw_rule(&mut self){
+        let n1 = get_num_value(self.pop_value().unwrap());
+        let n2 = get_num_value(self.pop_value().unwrap());
+        let result = n1 < n2;
+
+        self.push_value(boolExp_as_exp(boolean(result)));
+    }
+
+    pub fn le_kw_rule(&mut self){
+        let n1 = get_num_value(self.pop_value().unwrap());
+        let n2 = get_num_value(self.pop_value().unwrap());
+        let result = n1 <= n2;
+
+        self.push_value(boolExp_as_exp(boolean(result)));
+    }
+
+    pub fn neg_kw_rule(&mut self){
+        let n = get_bool_value(self.pop_value().unwrap());
+        let mut result:bool;
+        result = !n;
+        
+        self.push_value(boolExp_as_exp(boolean(result)));
+    }
+
 }
 
 pub fn eval_aexp_aut(aexp: ArithExp, mut aut: PiAut) -> PiAut{
@@ -254,6 +354,11 @@ pub fn eval_bexp_aut(bexp: BoolExp, mut aut: PiAut) -> PiAut{
         BoolExp::And{lhs,rhs} => aut.and_rule(lhs,rhs),
         BoolExp::Or{lhs,rhs} => aut.or_rule(lhs,rhs),
         BoolExp::Eq{lhs,rhs} => aut.eq_rule(lhs,rhs),
+        BoolExp::Neg{value} => aut.neg_rule(value),
+        BoolExp::Gt{lhs,rhs} => aut.gt_rule(lhs, rhs),
+        BoolExp::Ge{lhs,rhs} => aut.ge_rule(lhs, rhs),
+        BoolExp::Lt{lhs,rhs} => aut.lt_rule(lhs, rhs),
+        BoolExp::Le{lhs,rhs} => aut.le_rule(lhs, rhs),
         _ => unreachable!(),
     }
     aut
@@ -277,6 +382,11 @@ pub fn eval_kw_aut(keyword: KW,mut aut: PiAut) -> PiAut{
         KW::KWAnd => aut.and_kw_rule(),
         KW::KWOr => aut.or_kw_rule(),
         KW::KWEq => aut.eq_kw_rule(),
+        KW::KWNeg => aut.neg_kw_rule(),
+        KW::KWGt => aut.gt_kw_rule(),
+        KW::KWGe => aut.ge_kw_rule(),
+        KW::KWLt => aut.lt_kw_rule(),
+        KW::KWLe => aut.le_kw_rule(),
         _ => unreachable!(),
     }
     aut
@@ -335,6 +445,22 @@ pub fn or(lhs: Box<BoolExp>, rhs: Box<BoolExp>) -> Box<BoolExp>{
     Box::new(BoolExp::Or { lhs, rhs })
 }
 
+pub fn gt(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<BoolExp>{
+    Box::new(BoolExp::Gt { lhs, rhs })
+}
+
+pub fn ge(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<BoolExp>{
+    Box::new(BoolExp::Ge { lhs, rhs })
+}
+
+pub fn lt(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<BoolExp>{
+    Box::new(BoolExp::Lt { lhs, rhs })
+}
+
+pub fn le(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<BoolExp>{
+    Box::new(BoolExp::Le { lhs, rhs })
+}
+
 //pub fn get_num_value(num: Box<ArithExp>) -> f64 {
 pub fn get_num_value(num: Box<Exp>) -> f64 {
     let mut x: ArithExp;
@@ -377,13 +503,16 @@ pub fn kw_as_ctrl_stack_type(keyword: Box<KW>) -> Box<Ctrl_stack_type>{
     Box::new(Ctrl_stack_type::KW(*keyword))
 }
 
+pub fn exp_as_arithExp(expression: Box<Exp>) -> Box<ArithExp> {
+    match *expression{
+        Exp::ArithExp(aexp) => Box::new(aexp),
+        _ => unreachable!(),
+    }
+}
 
-pub fn eval_tree(program: &ArithExp) {
-    match program {
-        ArithExp::Sum {lhs, rhs} => println!("sum"),
-        ArithExp::Sub {lhs, rhs} => println!("sub"),
-        ArithExp::Mul {lhs, rhs} => println!("mul"),
-        ArithExp::Div {lhs, rhs} => println!("div"),
-        ArithExp::Num {value} => println!("{}", value)
+pub fn exp_as_boolExp(expression: Box<Exp>) -> Box<BoolExp> {
+    match *expression{
+        Exp::BoolExp(bexp) => Box::new(bexp),
+        _ => unreachable!(),
     }
 }

@@ -38,37 +38,72 @@ fn test_parser_arith_4() {
 }
 
 #[test]
-fn test_parser_bool_1() {
+fn test_parser_boolop_1() {
     let result = parser::parse_expression("true".to_owned());
     let expected = piinterpreter::boolExp_as_exp(boolean(true));
     assert_eq!(result, expected);
 }
 
 #[test]
-fn test_parser_bool_2() {
+fn test_parser_boolop_2() {
     let result = parser::parse_expression("true/\\false".to_owned());
     let expected = piinterpreter::boolExp_as_exp(and(boolean(true), boolean(false)));
     assert_eq!(result, expected);
 }
 
 #[test]
-fn test_parser_bool_3() {
+fn test_parser_boolop_3() {
     let result = parser::parse_expression("~true".to_owned());
     let expected = piinterpreter::boolExp_as_exp(neg(boolean(true)));
     assert_eq!(result, expected);
 }
 
 #[test]
-fn test_parser_bool_4() {
+fn test_parser_boolop_4() {
     let result = parser::parse_expression("~true\\/true".to_owned());
     let expected = piinterpreter::boolExp_as_exp(or(neg(boolean(true)), boolean(true)));
     assert_eq!(result, expected);
 }
 
 #[test]
-fn test_parser_bool_5() {
+fn test_parser_boolop_5() {
     let result = parser::parse_expression("~true\\/(true/\\false)".to_owned());
     let expected = piinterpreter::boolExp_as_exp(or(neg(boolean(true)), and(boolean(true), boolean(false))));
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_parser_iop_1() {
+    let result = parser::parse_expression("3 > 2".to_owned());
+    let expected = piinterpreter::boolExp_as_exp(gt(num(3.0), num(2.0)));
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_parser_iop_2() {
+    let result = parser::parse_expression("3 < 2".to_owned());
+    let expected = piinterpreter::boolExp_as_exp(lt(num(3.0), num(2.0)));
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_parser_iop_3() {
+    let result = parser::parse_expression("3 >= 2".to_owned());
+    let expected = piinterpreter::boolExp_as_exp(ge(num(3.0), num(2.0)));
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_parser_iop_4() {
+    let result = parser::parse_expression("3 <= 2".to_owned());
+    let expected = piinterpreter::boolExp_as_exp(le(num(3.0), num(2.0)));
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_parser_iop_5() {
+    let result = parser::parse_expression("(3*2) > 5+1".to_owned());
+    let expected = piinterpreter::boolExp_as_exp(gt(mul(num(3.0), num(2.0)), sum(num(5.0), num(1.0))));
     assert_eq!(result, expected);
 }
 
@@ -91,6 +126,22 @@ pub fn eq(lhs: Box<piinterpreter::BoolExp>, rhs: Box<piinterpreter::BoolExp>) ->
 
 pub fn neg(rhs: Box<piinterpreter::BoolExp>) -> Box<piinterpreter::BoolExp>{
     piinterpreter::neg(rhs)
+}
+
+pub fn gt(lhs: Box<piinterpreter::ArithExp>, rhs: Box<piinterpreter::ArithExp>) -> Box<piinterpreter::BoolExp>{
+    piinterpreter::gt(lhs, rhs)
+}
+
+pub fn ge(lhs: Box<piinterpreter::ArithExp>, rhs: Box<piinterpreter::ArithExp>) -> Box<piinterpreter::BoolExp>{
+    piinterpreter::ge(lhs, rhs)
+}
+
+pub fn lt(lhs: Box<piinterpreter::ArithExp>, rhs: Box<piinterpreter::ArithExp>) -> Box<piinterpreter::BoolExp>{
+    piinterpreter::lt(lhs, rhs)
+}
+
+pub fn le(lhs: Box<piinterpreter::ArithExp>, rhs: Box<piinterpreter::ArithExp>) -> Box<piinterpreter::BoolExp>{
+    piinterpreter::le(lhs, rhs)
 }
 
 pub fn num(value: f64) -> Box<piinterpreter::ArithExp> {
