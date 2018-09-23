@@ -13,7 +13,6 @@ arithop = _{ add | subtract | multiply | divide }
 
 boolop = _{ equal | and | or }
     equal = { "=" }
-    neg   = { "~" }
     and   = { "/\u{005C}" }
     or    = { "\u{005C}/"}
 
@@ -22,14 +21,17 @@ iop = _{ greater_than | greater_equal | less_than | less_equal }
     greater_than  = { ">" }
     greater_equal = { ">=" }
     less_than     = { "<" }
-    less_equal    = { "<=" }    
+    less_equal    = { "<=" } 
+
+neg   = { "~" }
 
 exp = _{ aexp | bexp }
 aexp = { aterm ~ (arithop ~ aterm)* }
-bexp = { bterm ~ (boolop ~ bterm)* | neg ~ bterm }
+
+bexp = { bterm ~ (boolop ~ bterm)*}
 
 aterm = _{ num | "(" ~ aexp ~ ")" | id}
-bterm = _{ boolean | "(" ~ bexp ~ ")"}
+bterm = _{ boolean | "(" ~ bexp ~ ")" | neg ~ bterm }
 
 identifier_char = _{ 'a'..'z' | 'A'..'Z' | '0'..'9' | "_" }
 id      =  {
