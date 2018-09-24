@@ -5,6 +5,7 @@ use std::boxed::Box;
 use std::collections::LinkedList;
 use std::option::Option;
 
+#[derive(Debug, PartialEq)]
 pub enum Statement{
     Cmd(Cmd),
     Exp(Exp),
@@ -77,6 +78,7 @@ pub enum BoolExp{
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub enum Cmd{
     Assign {
         id: Id,
@@ -85,11 +87,16 @@ pub enum Cmd{
     While {
         boolExp: Box<BoolExp>,
         cmd: Box<Cmd>
-    }
+    },
+    CSeq {
+        command: Box<Cmd>,
+        next_command: Box<Cmd>
+    },
 }
 
+#[derive(Debug, PartialEq)]
 pub struct Id {
-    value: String
+    pub value: String
 }
 
 #[derive(Debug)]
@@ -477,6 +484,22 @@ pub fn le(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<BoolExp>{
     Box::new(BoolExp::Le { lhs, rhs })
 }
 
+pub fn id(value: String) -> Id {
+    Id {value}
+}
+
+pub fn assign(id: Id, value: Box<Exp>) -> Box<Cmd> {
+    Box::new(Cmd::Assign {id, value})
+}
+
+pub fn while_loop(boolExp: Box<BoolExp>, cmd: Box<Cmd>) -> Box<Cmd> {
+    Box::new(Cmd::While {boolExp, cmd})
+}
+
+pub fn cseq(command: Box<Cmd>, next_command: Box<Cmd>) -> Box<Cmd> {
+    Box::new(Cmd::CSeq {command, next_command})
+}
+
 //pub fn get_num_value(num: Box<ArithExp>) -> f64 {
 pub fn get_num_value(num: Box<Exp>) -> f64 {
     let mut x: ArithExp;
@@ -506,13 +529,27 @@ pub fn arithExp_as_exp(expression: Box<ArithExp>) -> Box<Exp> {
     Box::new(Exp::ArithExp(*expression))
 }
 
+pub fn arithExp_as_statement(expression: Box<ArithExp>) -> Box<Statement> {
+    Box::new(Statement::Exp(*arithExp_as_exp(expression)))
+}
 pub fn boolExp_as_exp(expression: Box<BoolExp>) -> Box<Exp> {
-    //let exp = &*Box::leak(expression);
     Box::new(Exp::BoolExp(*expression))
+}
+
+pub fn boolExp_as_statement(expression: Box<BoolExp>) -> Box<Statement> {
+    Box::new(Statement::Exp(*boolExp_as_exp(expression)))
 }
 
 pub fn exp_as_ctrl_stack_type(expression: Box<Exp>) -> Box<Ctrl_stack_type>{
     Box::new(Ctrl_stack_type::Exp(*expression))
+}
+
+pub fn exp_as_statement(statement: Box<Exp>) -> Box<Statement> {
+    Box::new(Statement::Exp(*statement))
+}
+ 
+pub fn cmd_as_statement(statement: Box<Cmd>) -> Box<Statement> {
+    Box::new(Statement::Cmd(*statement))
 }
 
 pub fn kw_as_ctrl_stack_type(keyword: Box<KW>) -> Box<Ctrl_stack_type>{
