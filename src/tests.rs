@@ -121,6 +121,12 @@ fn test_parser_cmd_2() {
     assert_eq!(result, expected);
 }
 
+#[test]
+fn test_parser_cmd_3() {
+    let result = parser::parse_input("while (true) do { x := 5 }".to_owned());
+    let expected = piinterpreter::cmd_as_statement(while_loop(boolean(true), assign(id("x".to_owned()), piinterpreter::arithExp_as_exp(num(5.0)))));
+    assert_eq!(result, expected);
+}
 
 
 pub fn boolean(value: bool) -> Box<piinterpreter::BoolExp>{
@@ -185,6 +191,10 @@ pub fn id(value: String) -> piinterpreter::Id{
 
 pub fn assign(id: piinterpreter::Id, value: Box<piinterpreter::Exp>) -> Box<piinterpreter::Cmd> {
     piinterpreter::assign(id, value)
+}
+
+pub fn while_loop(bool_exp: Box<piinterpreter::BoolExp>, cmd: Box<piinterpreter::Cmd>) -> Box<piinterpreter::Cmd> {
+    piinterpreter::while_loop(bool_exp, cmd)
 }
 
 pub fn cseq(command: Box<piinterpreter::Cmd>, next_command: Box<piinterpreter::Cmd>) -> Box<piinterpreter::Cmd> {

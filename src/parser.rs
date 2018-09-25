@@ -198,6 +198,10 @@ fn transform_cmd(pair: Pair<Rule>) -> Box<piinterpreter::Cmd> {
                 result = transform_assign(p);
                 x = x+1;
             },
+            Rule::while_cmd => {
+                result = transform_while(p);
+                x = x+1;
+            },
             _ => unreachable!()
         }
     }
@@ -215,6 +219,13 @@ fn transform_assign(pair: Pair<Rule>) -> Box<piinterpreter::Cmd> {
         _ => unreachable!()
     };
     piinterpreter::assign(id, exp)
+}
+
+fn transform_while(pair: Pair<Rule>) -> Box<piinterpreter::Cmd> {
+    let mut pairs = pair.clone().into_inner();
+    let boolean_exp: Box<piinterpreter::BoolExp> = transform_bool(pairs.next().unwrap());
+    let cmd: Box<piinterpreter::Cmd> = transform_cmd(pairs.next().unwrap());
+    piinterpreter::while_loop(boolean_exp, cmd)
 }
 
 fn bool_value(pair: Pair<Rule>) -> bool {
