@@ -1,3 +1,5 @@
+/*
+
 use pest::Parser;
 use pest::iterators::{Pair, Pairs};
 use pest::prec_climber::*;
@@ -94,7 +96,7 @@ fn transform_bool(pair: Pair<Rule>) -> Box<piinterpreter::BoolExp> {
                     _ => {
                         rhs = piinterpreter::boolExp_as_exp(transform_bool_for_op(next_pair));
                     },
-                } 
+                }
                 x = x + 2;
                 lhs = piinterpreter::boolExp_as_exp(piinterpreter::and(piinterpreter::exp_as_boolExp(lhs), piinterpreter::exp_as_boolExp(rhs)));
                 lhsblock = false;
@@ -117,7 +119,7 @@ fn transform_bool(pair: Pair<Rule>) -> Box<piinterpreter::BoolExp> {
                     _ => {
                         rhs = piinterpreter::boolExp_as_exp(transform_bool_for_op(next_pair));
                     },
-                } 
+                }
                 x = x + 2;
                 lhs = piinterpreter::boolExp_as_exp(piinterpreter::or(piinterpreter::exp_as_boolExp(lhs), piinterpreter::exp_as_boolExp(rhs)));
                 lhsblock = false;
@@ -133,7 +135,7 @@ fn transform_bool(pair: Pair<Rule>) -> Box<piinterpreter::BoolExp> {
                     _ => {
                         rhs = piinterpreter::boolExp_as_exp(transform_bool_for_op(next_pair));
                     },
-                } 
+                }
                 x = x + 2;
                 lhs = piinterpreter::boolExp_as_exp(piinterpreter::eq(piinterpreter::exp_as_boolExp(lhs), piinterpreter::exp_as_boolExp(rhs)));
                 lhsblock = false;
@@ -178,7 +180,7 @@ fn transform_bool_for_op(pair: Pair<Rule>) -> Box<piinterpreter::BoolExp> {
         Rule::bexp => transform_bool(pair), // é uma bexp, deve ser avaliado pelo transform_bool
         Rule::boolean => piinterpreter::boolean(bool_value(pair)),
         _ => unreachable!(),
-    } 
+    }
 }
 
 fn transform_cmd(pair: Pair<Rule>) -> Box<piinterpreter::Cmd> {
@@ -287,3 +289,5 @@ pub fn parse_input(expression: String) -> Box<piinterpreter::Statement> {
         },
     }
 }
+
+*/

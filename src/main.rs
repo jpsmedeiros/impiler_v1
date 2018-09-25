@@ -20,8 +20,27 @@ use piinterpreter::*;
 mod parser;
 use parser::*;
 
+mod testy;
+use testy::*;
+
 fn main() {
-    parse();
+    //parse();
+
+    let mut aut = PiAut::new();
+    let a = id(String::from("a"));
+    let b = arithExp_as_exp(num(3.0));
+    let x = assign(a,b);
+    let y = statement_as_ctrl_stack_type(cmd_as_statement(x));
+    aut.push_ctrl(y);
+
+    aut = eval_automata(aut);
+    println!("Control Stack:");
+    aut.print_ctrl();
+    println!("Value Stack:");
+    aut.print_value();
+
+    //testing();
+
 }
 
 #[cfg(test)]
