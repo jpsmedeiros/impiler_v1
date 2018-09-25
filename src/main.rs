@@ -24,7 +24,7 @@ mod testy;
 use testy::*;
 
 fn main() {
-    //parse();
+    parse();
 
     let mut aut = PiAut::new();
     let a = id(String::from("a"));

@@ -575,9 +575,16 @@ pub fn le(lhs: Box<ArithExp>, rhs: Box<ArithExp>) -> Box<BoolExp>{
     Box::new(BoolExp::Le { lhs, rhs })
 }
 
-
 pub fn id(value: String) -> Id {
     Id {value}
+}
+
+pub fn arith_id(value: String) -> Box<ArithExp> {
+    Box::new(ArithExp::Id{ value })
+}
+
+pub fn bool_id(value: String) -> Box<BoolExp> {
+    Box::new(BoolExp::Id{ value })
 }
 
 pub fn id_as_aexp(expression: Id) -> Box<ArithExp> {

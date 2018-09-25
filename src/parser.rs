@@ -1,5 +1,3 @@
-/*
-
 use pest::Parser;
 use pest::iterators::{Pair, Pairs};
 use pest::prec_climber::*;
@@ -34,6 +32,7 @@ fn transform_arith(expression: Pairs<Rule>) -> Box<piinterpreter::ArithExp> {
        |pair: Pair<Rule>| match pair.as_rule() {
            Rule::num => piinterpreter::num(pair.as_str().parse::<f64>().unwrap()),
            Rule::aexp => transform_arith(pair.into_inner()),
+           Rule::id => piinterpreter::arith_id(pair.as_str().to_owned()),
            _ => unreachable!(),
        },
        |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
@@ -82,6 +81,15 @@ fn transform_bool(pair: Pair<Rule>) -> Box<piinterpreter::BoolExp> {
                     lhsblock = true;
                 }else{
                     rhs = piinterpreter::boolExp_as_exp(piinterpreter::boolean(bool_value(p)));
+                }
+                x = x + 1;
+            },
+            Rule::id => {
+                if !lhsblock {
+                    lhs = piinterpreter::boolExp_as_exp(piinterpreter::bool_id(p.as_str().to_owned()));
+                    lhsblock = true;
+                }else{
+                    rhs = piinterpreter::boolExp_as_exp(piinterpreter::bool_id(p.as_str().to_owned()));
                 }
                 x = x + 1;
             },
@@ -176,9 +184,11 @@ fn transform_bool(pair: Pair<Rule>) -> Box<piinterpreter::BoolExp> {
 }
 
 fn transform_bool_for_op(pair: Pair<Rule>) -> Box<piinterpreter::BoolExp> {
+    println!("ENTREI MAMA");
     match pair.as_rule() { // se for and devemos pegar o próximo valor
         Rule::bexp => transform_bool(pair), // é uma bexp, deve ser avaliado pelo transform_bool
         Rule::boolean => piinterpreter::boolean(bool_value(pair)),
+        Rule::id => piinterpreter::bool_id(pair.as_str().to_owned()),
         _ => unreachable!(),
     }
 }
@@ -289,5 +299,3 @@ pub fn parse_input(expression: String) -> Box<piinterpreter::Statement> {
         },
     }
 }
-
-*/
