@@ -508,14 +508,14 @@ pub fn eval_statement(statement: Statement ,mut aut: PiAut) -> PiAut{
 
 pub fn eval_automata(mut aut: PiAut) -> PiAut{
 
-    //while !aut.control_stack.is_empty(){
+    while !aut.control_stack.is_empty(){
         let tree = aut.pop_ctrl();
         match *tree.unwrap(){
             Ctrl_stack_type::KW(kw) => aut = eval_kw_aut(kw,aut),
             Ctrl_stack_type::Statement(statement) => aut = eval_statement(statement,aut),
             _ => unreachable!(),
         }
-    //}
+    }
     aut
 }
 
