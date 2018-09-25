@@ -38,6 +38,13 @@ fn test_parser_arith_4() {
 }
 
 #[test]
+fn test_parser_arith_5() {
+    let result = parser::parse_input("5 * x".to_owned());
+    let expected = piinterpreter::arithExp_as_statement(mul(num(5.0), arith_id("x".to_owned())));
+    assert_eq!(result, expected);
+}
+
+#[test]
 fn test_parser_boolop_1() {
     let result = parser::parse_input("true".to_owned());
     let expected = piinterpreter::boolExp_as_statement(boolean(true));
@@ -187,6 +194,14 @@ pub fn div(lhs: Box<piinterpreter::ArithExp>, rhs: Box<piinterpreter::ArithExp>)
 
 pub fn id(value: String) -> piinterpreter::Id{
     piinterpreter::id(value)
+}
+
+pub fn arith_id(value: String) -> Box<piinterpreter::ArithExp> {
+    piinterpreter::arith_id(value)
+}
+
+pub fn bool_id(value: String) -> Box<piinterpreter::BoolExp> {
+    piinterpreter::bool_id(value)
 }
 
 pub fn assign(id: piinterpreter::Id, value: Box<piinterpreter::Exp>) -> Box<piinterpreter::Cmd> {

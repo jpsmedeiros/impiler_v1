@@ -32,7 +32,7 @@ fn transform_arith(expression: Pairs<Rule>) -> Box<piinterpreter::ArithExp> {
        |pair: Pair<Rule>| match pair.as_rule() {
            Rule::num => piinterpreter::num(pair.as_str().parse::<f64>().unwrap()),
            Rule::aexp => transform_arith(pair.into_inner()),
-           Rule::id => piinterpreter::arith_id(pair.as_str().to_owned()),
+           Rule::id => piinterpreter::arith_id(str::replace(pair.as_str(), " ", "")),
            _ => unreachable!(),
        },
        |lhs, op: Pair<Rule>, rhs | match op.as_rule() {
@@ -86,10 +86,10 @@ fn transform_bool(pair: Pair<Rule>) -> Box<piinterpreter::BoolExp> {
             },
             Rule::id => {
                 if !lhsblock {
-                    lhs = piinterpreter::boolExp_as_exp(piinterpreter::bool_id(p.as_str().to_owned()));
+                    lhs = piinterpreter::boolExp_as_exp(piinterpreter::bool_id(str::replace(p.as_str(), " ", "")));
                     lhsblock = true;
                 }else{
-                    rhs = piinterpreter::boolExp_as_exp(piinterpreter::bool_id(p.as_str().to_owned()));
+                    rhs = piinterpreter::boolExp_as_exp(piinterpreter::bool_id(str::replace(p.as_str(), " ", "")));
                 }
                 x = x + 1;
             },
@@ -184,11 +184,10 @@ fn transform_bool(pair: Pair<Rule>) -> Box<piinterpreter::BoolExp> {
 }
 
 fn transform_bool_for_op(pair: Pair<Rule>) -> Box<piinterpreter::BoolExp> {
-    println!("ENTREI MAMA");
     match pair.as_rule() { // se for and devemos pegar o próximo valor
         Rule::bexp => transform_bool(pair), // é uma bexp, deve ser avaliado pelo transform_bool
         Rule::boolean => piinterpreter::boolean(bool_value(pair)),
-        Rule::id => piinterpreter::bool_id(pair.as_str().to_owned()),
+        Rule::id => piinterpreter::bool_id(str::replace(pair.as_str(), " ", "")),
         _ => unreachable!(),
     }
 }
@@ -257,11 +256,11 @@ fn print_input_message() {
     println!("\nDigite o comando desejado");
 }
 
-fn print_aut(result: Box<piinterpreter::Exp>){
+fn print_aut(result: Box<piinterpreter::Statement>){
     let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
     match *result {
-        piinterpreter::Exp::ArithExp(arithExp) => aut.push_ctrl(piinterpreter::exp_as_ctrl_stack_type(piinterpreter::arithExp_as_exp(Box::new(arithExp)))),
-        piinterpreter::Exp::BoolExp(boolExp)  => aut.push_ctrl(piinterpreter::exp_as_ctrl_stack_type(piinterpreter::boolExp_as_exp(Box::new(boolExp)))),
+        piinterpreter::Statement::Exp(exp) => aut.push_ctrl(piinterpreter::statement_as_ctrl_stack_type(piinterpreter::exp_as_statement(Box::new(exp)))),
+        piinterpreter::Statement::Cmd(cmd)  => aut.push_ctrl(piinterpreter::statement_as_ctrl_stack_type(piinterpreter::cmd_as_statement(Box::new(cmd)))),
         _ => unreachable!()
     }
     aut = piinterpreter::eval_automata(aut);
@@ -270,6 +269,8 @@ fn print_aut(result: Box<piinterpreter::Exp>){
     aut.print_ctrl();
     println!("Value Stack:");
     aut.print_value();
+    println!("Memory:");
+    aut.print_memory();
 }
 
 pub fn parse(){
@@ -280,7 +281,7 @@ pub fn parse(){
         let line = line.unwrap();
         let pilib_result = parse_input(line);
         println!("PI-LIB = {:?}", pilib_result);
-        //print_aut(pilib_result);
+        print_aut(pilib_result);
         print_input_message();
     }
 

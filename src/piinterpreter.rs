@@ -121,6 +121,7 @@ pub enum KW{
     KWLt,
     KWLe,
     KWAss,
+    KWCseq,
 }
 
 #[derive(Debug)]
@@ -165,6 +166,13 @@ impl PiAut{
 
     pub fn print_value(&self){
         let i = self.value_stack.iter();
+        for element in i{
+            println!("{:?}",element);
+        }
+    }
+
+    pub fn print_memory(&self){
+        let i = self.store.iter();
         for element in i{
             println!("{:?}",element);
         }
@@ -284,6 +292,12 @@ impl PiAut{
 
 
         //self.push_value(id_as_exp(lhs));
+    }
+
+    pub fn cseq_rule(&mut self, lhs: Box<Cmd>, rhs: Box<Cmd>){
+        // let x = Box::new(KW::KWCseq);
+        // self.push_ctrl(kw_as_ctrl_stack_type(x));
+        // TODO
     }
 
     pub fn sum_kw_rule(&mut self){
@@ -465,8 +479,10 @@ pub fn eval_exp_aut(expression: Exp,mut aut: PiAut) -> PiAut{
 }
 
 pub fn eval_command(cmd: Cmd, mut aut: PiAut) -> PiAut{
+    println!("CMD = {:?}", cmd);
     match cmd{
         Cmd::Assign{id,value} => aut.assign_rule(id,value),
+        Cmd::CSeq{command, next_command} => aut.cseq_rule(command, next_command),
         _ => unreachable!(),
     }
     aut
