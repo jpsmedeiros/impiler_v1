@@ -4,6 +4,7 @@ use std;
 use std::boxed::Box;
 use std::collections::LinkedList;
 use std::option::Option;
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 pub enum Statement{
@@ -15,6 +16,7 @@ pub enum Statement{
 pub enum Exp{
     ArithExp(ArithExp),
     BoolExp(BoolExp),
+    Id(Id),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -112,7 +114,8 @@ pub enum KW{
     KWGt,
     KWGe,
     KWLt,
-    KWLe
+    KWLe,
+    KWAss,
 }
 
 #[derive(Debug)]
@@ -124,11 +127,12 @@ pub enum Ctrl_stack_type{
 pub struct PiAut{
     control_stack: LinkedList<Box<Ctrl_stack_type>>,
     value_stack: LinkedList<Box<Exp>>,
+    store: HashMap<String, Box<Exp>>,
 }
 
 impl PiAut{
     pub fn new() -> PiAut{
-        PiAut{ control_stack: LinkedList::new(), value_stack: LinkedList::new() }
+        PiAut{ control_stack: LinkedList::new(), value_stack: LinkedList::new(), store: HashMap::new() }
     }
 
     pub fn push_ctrl(&mut self,x: Box<Ctrl_stack_type>){
@@ -256,6 +260,14 @@ impl PiAut{
         self.push_ctrl(exp_as_ctrl_stack_type(arithExp_as_exp(rhs)));
     }
 
+    pub fn assign_rule(&mut self, lhs: Id, rhs: Box<Exp>){
+        let x = Box::new(KW::KWAss);
+        self.push_ctrl(kw_as_ctrl_stack_type(x));
+        self.push_ctrl(exp_as_ctrl_stack_type(rhs));
+
+        self.push_value(id_as_exp(lhs));
+    }
+
     pub fn sum_kw_rule(&mut self){
         let n1 = get_num_value(self.pop_value().unwrap());
         let n2 = get_num_value(self.pop_value().unwrap());
@@ -313,7 +325,7 @@ impl PiAut{
         }else{
             result = false
         }
-        
+
         self.push_value(boolExp_as_exp(boolean(result)));
     }
 
@@ -353,8 +365,20 @@ impl PiAut{
         let n = get_bool_value(self.pop_value().unwrap());
         let mut result:bool;
         result = !n;
-        
+
         self.push_value(boolExp_as_exp(boolean(result)));
+    }
+
+    pub fn assign_kw_rule(&mut self){
+        let value = self.pop_value().unwrap();
+        let x = self.pop_value().unwrap();
+        let mut key: String;
+        match *x{
+            Exp::Id(id) => key = get_id_value(id),
+            _ => unreachable!(),
+        }
+
+        self.store.insert(key,value);
     }
 
 }
@@ -391,6 +415,7 @@ pub fn eval_exp_aut(expression: Exp,mut aut: PiAut) -> PiAut{
     match expression{
         Exp::ArithExp(aexp) => aut = eval_aexp_aut(aexp,aut),
         Exp::BoolExp(bexp) => aut = eval_bexp_aut(bexp,aut),
+        //Exp::Id(id) => aut = eval_id_aut()
         _ => unreachable!(),
     }
     aut
@@ -410,6 +435,7 @@ pub fn eval_kw_aut(keyword: KW,mut aut: PiAut) -> PiAut{
         KW::KWGe => aut.ge_kw_rule(),
         KW::KWLt => aut.lt_kw_rule(),
         KW::KWLe => aut.le_kw_rule(),
+        KW::KWAss => aut.assign_kw_rule(),
         _ => unreachable!(),
     }
     aut
@@ -500,6 +526,12 @@ pub fn cseq(command: Box<Cmd>, next_command: Box<Cmd>) -> Box<Cmd> {
     Box::new(Cmd::CSeq {command, next_command})
 }
 
+pub fn get_id_value(id: Id) -> String{
+    match id{
+        Id{value} => value,
+    }
+}
+
 //pub fn get_num_value(num: Box<ArithExp>) -> f64 {
 pub fn get_num_value(num: Box<Exp>) -> f64 {
     let mut x: ArithExp;
@@ -525,6 +557,10 @@ pub fn get_bool_value(num: Box<Exp>) -> bool {
     }
 }
 
+pub fn id_as_exp(expression: Id) -> Box<Exp> {
+    Box::new(Exp::Id(expression))
+}
+
 pub fn arithExp_as_exp(expression: Box<ArithExp>) -> Box<Exp> {
     Box::new(Exp::ArithExp(*expression))
 }
@@ -547,7 +583,7 @@ pub fn exp_as_ctrl_stack_type(expression: Box<Exp>) -> Box<Ctrl_stack_type>{
 pub fn exp_as_statement(statement: Box<Exp>) -> Box<Statement> {
     Box::new(Statement::Exp(*statement))
 }
- 
+
 pub fn cmd_as_statement(statement: Box<Cmd>) -> Box<Statement> {
     Box::new(Statement::Cmd(*statement))
 }
