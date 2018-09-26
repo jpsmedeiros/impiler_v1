@@ -26,12 +26,12 @@ iop = _{ greater_equal | less_equal | greater_than | less_than  }
 neg   = { "~" }
 
 exp = _{ bexp | aexp }
-aexp = { aterm ~ (arithop ~ aterm)* }
+aexp = { aterm ~ !(boolop) ~ (arithop ~ aterm)* }
 
 bexp = { bterm ~ (boolop ~ bterm)* | aexp ~ iop ~ aexp }
 
 aterm = _{ num | "(" ~ aexp ~ ")" | id}
-bterm = _{ boolean | "(" ~ bexp ~ ")" | neg ~ bterm }
+bterm = _{ boolean | "(" ~ bexp ~ ")" | neg ~ bterm | !(id ~ arithop) ~ id }
 
 identifier_char = _{ 'a'..'z' | 'A'..'Z' | '0'..'9' | "_" }
 id      =  {
@@ -41,8 +41,11 @@ id      =  {
 
 cmd = { cmdterm ~ ";" ~ cmd | cmdterm}
 
-cmdterm = _{ id ~ ":=" ~ exp |  "while" ~ "(" ~ bexp ~ ")" ~ "do" ~ "{" ~ cmd ~ "}"}
+cmdterm = _{ while_cmd | assign_cmd }
 
-impiler = _{ soi ~ (exp | cmd) ~ eoi }
+assign_cmd = { id ~ ":=" ~ exp }
+while_cmd = { "while" ~ "(" ~ bexp ~ ")" ~ "do" ~ "{" ~ cmd ~ "}" }
+
+impiler = _{ soi ~ (cmd |exp) ~ eoi }
 
 whitespace = _{ " " | "\t" }
