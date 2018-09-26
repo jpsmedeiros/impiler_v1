@@ -139,7 +139,7 @@ fn test_parser_cmd_3() {
 fn test_aut_arith_1() {
     let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
     let result = parser::get_aut(parser::parse_input("5 + 3".to_owned()));
-    aut.value_stack.push_front(piinterpreter::arithExp_as_exp(num(8.0)));
+    aut.value_stack.push_front(piinterpreter::arithExp_as_statement(num(8.0)));
     let expected = aut;
     assert_eq!(result, expected);
 }
@@ -148,7 +148,7 @@ fn test_aut_arith_1() {
 fn test_aut_bool_1() {
     let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
     let result = parser::get_aut(parser::parse_input("true /\\ false".to_owned()));
-    aut.value_stack.push_front(piinterpreter::boolExp_as_exp(boolean(false)));
+    aut.value_stack.push_front(piinterpreter::boolExp_as_statement(boolean(false)));
     let expected = aut;
     assert_eq!(result, expected);
 }

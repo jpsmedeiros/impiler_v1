@@ -6,13 +6,13 @@ use std::collections::LinkedList;
 use std::option::Option;
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Statement{
     Cmd(Cmd),
     Exp(Exp),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Exp{
     ArithExp(ArithExp),
     BoolExp(BoolExp),
@@ -85,7 +85,7 @@ pub enum BoolExp{
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Cmd{
     Assign {
         id: Id,
@@ -101,7 +101,7 @@ pub enum Cmd{
     },
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Id {
     pub value: String
 }
@@ -133,7 +133,7 @@ pub enum Ctrl_stack_type{
 #[derive(Debug, PartialEq)]
 pub struct PiAut{
     pub control_stack: LinkedList<Box<Ctrl_stack_type>>,
-    pub value_stack: LinkedList<Box<Exp>>,
+    pub value_stack: LinkedList<Box<Statement>>,
     pub store: HashMap<String, Exp>,
 }
 
@@ -150,11 +150,11 @@ impl PiAut{
         self.control_stack.pop_front()
     }
 
-    pub fn push_value(&mut self,x: Box<Exp>){
+    pub fn push_value(&mut self,x: Box<Statement>){
         self.value_stack.push_front(x);
     }
 
-    pub fn pop_value(&mut self) -> Option<Box<Exp>>{
+    pub fn pop_value(&mut self) -> Option<Box<Statement>>{
         self.value_stack.pop_front()
     }
 
@@ -291,7 +291,7 @@ impl PiAut{
             }
         }
         */
-        self.push_value(arithExp_as_exp(id_as_aexp(lhs)));
+        self.push_value(arithExp_as_statement(id_as_aexp(lhs)));
 
         self.push_ctrl(exp_as_ctrl_stack_type(rhs));
 
@@ -304,17 +304,21 @@ impl PiAut{
         self.push_ctrl(statement_as_ctrl_stack_type(cmd_as_statement(cmd1)));
     }
 
-    pub fn while_rule(&mut self, bexp: Box<BoolExp>, cmd: Box<Cmd>) {
+    pub fn while_rule(&mut self,bexp: BoolExp, cmd: Cmd) {
         let x = Box::new(KW::KWLoop);
         self.push_ctrl(kw_as_ctrl_stack_type(x));
 
-        self.push_ctrl(statement_as_ctrl_stack_type(boolExp_as_statement(bexp)));
-        self.push_ctrl(statement_as_ctrl_stack_type(cmd_as_statement(cmd)));
+        let c1 = bexp.clone();
+        let c2 = bexp.clone();
+        self.push_ctrl(exp_as_ctrl_stack_type(boolExp_as_exp(Box::new(c1))));
+
+        self.push_value(cmd_as_statement(while_loop(Box::new(c2),Box::new(cmd))));
+
     }
 
     pub fn get_value_from_memory(&mut self, id: String) -> f64 {
         let value = self.store.get(&id.to_string()).unwrap();
-        match value { // get value from rashmap 
+        match value { // get value from rashmap
             Exp::ArithExp(aexp) => get_aexp_num_value(aexp), // pass aexp to get_aexp_num_value
             _ => unreachable!(),
         }
@@ -325,7 +329,7 @@ impl PiAut{
         let n2 = get_num_value(self.pop_value().unwrap(), self);
         let result = n1 + n2;
 
-        self.push_value(arithExp_as_exp(num(result)));
+        self.push_value(arithExp_as_statement(num(result)));
     }
 
     pub fn sub_kw_rule(&mut self){
@@ -333,7 +337,7 @@ impl PiAut{
         let n2 = get_num_value(self.pop_value().unwrap(), self);
         let result = n1 - n2;
 
-        self.push_value(arithExp_as_exp(num(result)));
+        self.push_value(arithExp_as_statement(num(result)));
     }
 
     pub fn mul_kw_rule(&mut self){
@@ -341,7 +345,7 @@ impl PiAut{
         let n2 = get_num_value(self.pop_value().unwrap(), self);
         let result = n1 * n2;
 
-        self.push_value(arithExp_as_exp(num(result)));
+        self.push_value(arithExp_as_statement(num(result)));
     }
 
     pub fn div_kw_rule(&mut self){
@@ -349,7 +353,7 @@ impl PiAut{
         let n2 = get_num_value(self.pop_value().unwrap(), self);
         let result = n1 / n2;
 
-        self.push_value(arithExp_as_exp(num(result)));
+        self.push_value(arithExp_as_statement(num(result)));
     }
 
     pub fn and_kw_rule(&mut self){
@@ -357,7 +361,7 @@ impl PiAut{
         let n2 = get_bool_value(self.pop_value().unwrap());
         let result = n1 && n2;
 
-        self.push_value(boolExp_as_exp(boolean(result)));
+        self.push_value(boolExp_as_statement(boolean(result)));
     }
 
     pub fn or_kw_rule(&mut self){
@@ -365,7 +369,7 @@ impl PiAut{
         let n2 = get_bool_value(self.pop_value().unwrap());
         let result = n1 || n2;
 
-        self.push_value(boolExp_as_exp(boolean(result)));
+        self.push_value(boolExp_as_statement(boolean(result)));
     }
 
     pub fn eq_kw_rule(&mut self){
@@ -378,7 +382,7 @@ impl PiAut{
             result = false
         }
 
-        self.push_value(boolExp_as_exp(boolean(result)));
+        self.push_value(boolExp_as_statement(boolean(result)));
     }
 
     pub fn gt_kw_rule(&mut self){
@@ -386,7 +390,7 @@ impl PiAut{
         let n2 = get_num_value(self.pop_value().unwrap(), self);
         let result = n1 > n2;
 
-        self.push_value(boolExp_as_exp(boolean(result)));
+        self.push_value(boolExp_as_statement(boolean(result)));
     }
 
     pub fn ge_kw_rule(&mut self){
@@ -394,7 +398,7 @@ impl PiAut{
         let n2 = get_num_value(self.pop_value().unwrap(), self);
         let result = n1 >= n2;
 
-        self.push_value(boolExp_as_exp(boolean(result)));
+        self.push_value(boolExp_as_statement(boolean(result)));
     }
 
     pub fn lt_kw_rule(&mut self){
@@ -402,7 +406,7 @@ impl PiAut{
         let n2 = get_num_value(self.pop_value().unwrap(), self);
         let result = n1 < n2;
 
-        self.push_value(boolExp_as_exp(boolean(result)));
+        self.push_value(boolExp_as_statement(boolean(result)));
     }
 
     pub fn le_kw_rule(&mut self){
@@ -410,7 +414,7 @@ impl PiAut{
         let n2 = get_num_value(self.pop_value().unwrap(), self);
         let result = n1 <= n2;
 
-        self.push_value(boolExp_as_exp(boolean(result)));
+        self.push_value(boolExp_as_statement(boolean(result)));
     }
 
     pub fn neg_kw_rule(&mut self){
@@ -418,7 +422,7 @@ impl PiAut{
         let mut result:bool;
         result = !n;
 
-        self.push_value(boolExp_as_exp(boolean(result)));
+        self.push_value(boolExp_as_statement(boolean(result)));
     }
 
     pub fn assign_kw_rule(&mut self){
@@ -453,23 +457,40 @@ impl PiAut{
 
         key = exp_to_id_value(x).unwrap();
 
-        self.store.insert(key,*value);
+        let e: Exp;
+
+        match *value {
+            Statement::Exp(exp) => {e = exp;},
+            _ => unreachable!(),
+        }
+
+        self.store.insert(key, e);
     }
 
     pub fn while_kw_rule(&mut self) {
-        // TODO
+        let value = get_bool_value(self.pop_value().unwrap());
+        let wloop = self.pop_value().unwrap();
+        let cp = wloop.clone();
+
+        if(value){
+            self.push_ctrl(statement_as_ctrl_stack_type(wloop));
+            match *cp{
+                Statement::Cmd(cmd) => self.push_ctrl(statement_as_ctrl_stack_type(cmd_as_statement(Box::new(cmd)))),
+                _ => unreachable!(),
+            }
+        }
     }
 
 }
 
 pub fn eval_aexp_aut(aexp: ArithExp, mut aut: PiAut) -> PiAut{
     match aexp{
-        ArithExp::Num{value} => aut.push_value(arithExp_as_exp(num(value))),
+        ArithExp::Num{value} => aut.push_value(arithExp_as_statement(num(value))),
         ArithExp::Sum{lhs,rhs} => aut.sum_rule(lhs,rhs),
         ArithExp::Sub{lhs,rhs} => aut.sub_rule(lhs,rhs),
         ArithExp::Mul{lhs,rhs} => aut.mul_rule(lhs,rhs),
         ArithExp::Div{lhs,rhs} => aut.div_rule(lhs,rhs),
-        ArithExp::Id{value} => aut.push_value(arithExp_as_exp(id_as_aexp(id(value)))),
+        ArithExp::Id{value} => aut.push_value(arithExp_as_statement(id_as_aexp(id(value)))),
         _ => unreachable!(),
     }
     aut
@@ -477,7 +498,7 @@ pub fn eval_aexp_aut(aexp: ArithExp, mut aut: PiAut) -> PiAut{
 
 pub fn eval_bexp_aut(bexp: BoolExp, mut aut: PiAut) -> PiAut{
     match bexp{
-        BoolExp::Bool{value} => aut.push_value(boolExp_as_exp(boolean(value))),
+        BoolExp::Bool{value} => aut.push_value(boolExp_as_statement(boolean(value))),
         BoolExp::And{lhs,rhs} => aut.and_rule(lhs,rhs),
         BoolExp::Or{lhs,rhs} => aut.or_rule(lhs,rhs),
         BoolExp::Eq{lhs,rhs} => aut.eq_rule(lhs,rhs),
@@ -486,7 +507,7 @@ pub fn eval_bexp_aut(bexp: BoolExp, mut aut: PiAut) -> PiAut{
         BoolExp::Ge{lhs,rhs} => aut.ge_rule(lhs, rhs),
         BoolExp::Lt{lhs,rhs} => aut.lt_rule(lhs, rhs),
         BoolExp::Le{lhs,rhs} => aut.le_rule(lhs, rhs),
-        BoolExp::Id{value} => aut.push_value(boolExp_as_exp(id_as_bexp(id(value)))),
+        BoolExp::Id{value} => aut.push_value(boolExp_as_statement(id_as_bexp(id(value)))),
         _ => unreachable!(),
     }
     aut
@@ -502,12 +523,12 @@ pub fn eval_exp_aut(expression: Exp,mut aut: PiAut) -> PiAut{
     aut
 }
 
-pub fn eval_command(cmd: Cmd, mut aut: PiAut) -> PiAut{
-    println!("CMD = {:?}", cmd);
-    match cmd{
+pub fn eval_command(command: Cmd, mut aut: PiAut) -> PiAut{
+    println!("CMD = {:?}", command);
+    match command{
         Cmd::Assign{id,value} => aut.assign_rule(id,value),
         Cmd::CSeq{command, next_command} => aut.cseq_rule(command, next_command),
-        Cmd::While{boolExp, cmd} => aut.while_rule(boolExp, cmd),
+        Cmd::While{boolExp, cmd} => aut.while_rule(*boolExp,*cmd),
         _ => unreachable!(),
     }
     aut
@@ -671,9 +692,15 @@ pub fn get_aexp_num_value(num: &ArithExp) -> f64 {
         _ => unreachable!(),
     }
 }
-pub fn get_num_value(num: Box<Exp>, aut: &mut PiAut) -> f64 {
+pub fn get_num_value(num: Box<Statement>, aut: &mut PiAut) -> f64 {
+    let e: Exp;
     let x: ArithExp;
     match *num {
+        Statement::Exp(exp) => {e = exp;},
+        _ => unreachable!(),
+    }
+
+    match e {
         Exp::ArithExp(aexp) => x = aexp,
         _ => unreachable!(),
     }
@@ -686,9 +713,16 @@ pub fn get_num_value(num: Box<Exp>, aut: &mut PiAut) -> f64 {
     }
 }
 
-pub fn get_bool_value(num: Box<Exp>) -> bool {
+pub fn get_bool_value(num: Box<Statement>) -> bool {
+    let e: Exp;
     let x: BoolExp;
+
     match *num {
+        Statement::Exp(exp) => {e = exp;},
+        _ => unreachable!(),
+    }
+
+    match e {
         Exp::BoolExp(bexp) => x = bexp,
         _ => unreachable!(),
     }
@@ -707,9 +741,16 @@ pub fn aexp_to_id_value(expression: Box<ArithExp>) -> Option<String>{
     result
 }
 
-pub fn exp_to_id_value(expression: Box<Exp>) -> Option<String>{
+pub fn exp_to_id_value(expression: Box<Statement>) -> Option<String>{
     let mut result: Option<String> = None;
-    match *expression{
+    let e: Exp;
+
+    match *expression {
+        Statement::Exp(exp) => {e = exp;},
+        _ => unreachable!(),
+    }
+
+    match e {
         Exp::ArithExp(aexp) => result = aexp_to_id_value(Box::new(aexp)),
         _ => unreachable!(),
     }
