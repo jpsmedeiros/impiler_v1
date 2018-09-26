@@ -6,13 +6,13 @@ use std::collections::LinkedList;
 use std::option::Option;
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Statement{
     Cmd(Cmd),
     Exp(Exp),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Exp{
     ArithExp(ArithExp),
     BoolExp(BoolExp),
@@ -85,7 +85,7 @@ pub enum BoolExp{
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Cmd{
     Assign {
         id: Id,
@@ -101,7 +101,7 @@ pub enum Cmd{
     },
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Id {
     pub value: String
 }
@@ -304,16 +304,21 @@ impl PiAut{
         self.push_ctrl(statement_as_ctrl_stack_type(cmd_as_statement(cmd1)));
     }
 
-    pub fn while_rule(&mut self, cmd: Cmd) {
+    pub fn while_rule(&mut self,bexp: BoolExp, cmd: Cmd) {
         let x = Box::new(KW::KWLoop);
         self.push_ctrl(kw_as_ctrl_stack_type(x));
 
-        self.push_value(cmd_as_statement(Box::new(cmd)));
+        let c1 = bexp.clone();
+        let c2 = bexp.clone();
+        self.push_ctrl(exp_as_ctrl_stack_type(boolExp_as_exp(Box::new(c1))));
+
+        self.push_value(cmd_as_statement(while_loop(Box::new(c2),Box::new(cmd))));
+
     }
 
     pub fn get_value_from_memory(&mut self, id: String) -> f64 {
         let value = self.store.get(&id.to_string()).unwrap();
-        match value { // get value from rashmap 
+        match value { // get value from rashmap
             Exp::ArithExp(aexp) => get_aexp_num_value(aexp), // pass aexp to get_aexp_num_value
             _ => unreachable!(),
         }
@@ -463,7 +468,17 @@ impl PiAut{
     }
 
     pub fn while_kw_rule(&mut self) {
-        // TODO
+        let value = get_bool_value(self.pop_value().unwrap());
+        let wloop = self.pop_value().unwrap();
+        let cp = wloop.clone();
+
+        if(value){
+            self.push_ctrl(statement_as_ctrl_stack_type(wloop));
+            match *cp{
+                Statement::Cmd(cmd) => self.push_ctrl(statement_as_ctrl_stack_type(cmd_as_statement(Box::new(cmd)))),
+                _ => unreachable!(),
+            }
+        }
     }
 
 }
@@ -513,7 +528,7 @@ pub fn eval_command(command: Cmd, mut aut: PiAut) -> PiAut{
     match command{
         Cmd::Assign{id,value} => aut.assign_rule(id,value),
         Cmd::CSeq{command, next_command} => aut.cseq_rule(command, next_command),
-        //Cmd::While{boolExp, cmd} => aut.while_rule(command),
+        Cmd::While{boolExp, cmd} => aut.while_rule(*boolExp,*cmd),
         _ => unreachable!(),
     }
     aut
