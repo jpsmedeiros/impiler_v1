@@ -135,6 +135,43 @@ fn test_parser_cmd_3() {
     assert_eq!(result, expected);
 }
 
+#[test]
+fn test_aut_arith_1() {
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    let result = parser::get_aut(parser::parse_input("5 + 3".to_owned()));
+    aut.value_stack.push_front(piinterpreter::arithExp_as_exp(num(8.0)));
+    let expected = aut;
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_aut_bool_1() {
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    let result = parser::get_aut(parser::parse_input("true /\\ false".to_owned()));
+    aut.value_stack.push_front(piinterpreter::boolExp_as_exp(boolean(false)));
+    let expected = aut;
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_aut_assign_1() {
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    let result = parser::get_aut(parser::parse_input("x := 5".to_owned()));
+    aut.store.insert("x".to_owned(), *piinterpreter::arithExp_as_exp(num(5.0)));
+    let expected = aut;
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_aut_assign_2() {
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    let result = parser::get_aut(parser::parse_input("x := 5; y := x*2".to_owned()));
+    aut.store.insert("x".to_owned(), *piinterpreter::arithExp_as_exp(num(5.0)));
+    aut.store.insert("y".to_owned(), *piinterpreter::arithExp_as_exp(num(10.0)));
+    let expected = aut;
+    assert_eq!(result, expected);
+}
+
 
 pub fn boolean(value: bool) -> Box<piinterpreter::BoolExp>{
     piinterpreter::boolean(value)

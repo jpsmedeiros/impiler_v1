@@ -273,6 +273,18 @@ fn print_aut(result: Box<piinterpreter::Statement>){
     aut.print_memory();
 }
 
+pub fn get_aut(result: Box<piinterpreter::Statement>) -> piinterpreter::PiAut {
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    match *result {
+        piinterpreter::Statement::Exp(exp) => aut.push_ctrl(piinterpreter::statement_as_ctrl_stack_type(piinterpreter::exp_as_statement(Box::new(exp)))),
+        piinterpreter::Statement::Cmd(cmd)  => aut.push_ctrl(piinterpreter::statement_as_ctrl_stack_type(piinterpreter::cmd_as_statement(Box::new(cmd)))),
+        _ => unreachable!()
+    }
+
+    aut = piinterpreter::eval_automata(aut);
+    aut
+}
+
 pub fn parse(){
     print_input_message();
     let stdin = std::io::stdin();
