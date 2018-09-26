@@ -121,6 +121,7 @@ pub enum KW{
     KWLt,
     KWLe,
     KWAss,
+    KWLoop
 }
 
 #[derive(Debug, PartialEq)]
@@ -303,6 +304,14 @@ impl PiAut{
         self.push_ctrl(statement_as_ctrl_stack_type(cmd_as_statement(cmd1)));
     }
 
+    pub fn while_rule(&mut self, bexp: Box<BoolExp>, cmd: Box<Cmd>) {
+        let x = Box::new(KW::KWLoop);
+        self.push_ctrl(kw_as_ctrl_stack_type(x));
+
+        self.push_ctrl(statement_as_ctrl_stack_type(boolExp_as_statement(bexp)));
+        self.push_ctrl(statement_as_ctrl_stack_type(cmd_as_statement(cmd)));
+    }
+
     pub fn get_value_from_memory(&mut self, id: String) -> f64 {
         let value = self.store.get(&id.to_string()).unwrap();
         match value { // get value from rashmap 
@@ -447,6 +456,10 @@ impl PiAut{
         self.store.insert(key,*value);
     }
 
+    pub fn while_kw_rule(&mut self) {
+        // TODO
+    }
+
 }
 
 pub fn eval_aexp_aut(aexp: ArithExp, mut aut: PiAut) -> PiAut{
@@ -494,6 +507,7 @@ pub fn eval_command(cmd: Cmd, mut aut: PiAut) -> PiAut{
     match cmd{
         Cmd::Assign{id,value} => aut.assign_rule(id,value),
         Cmd::CSeq{command, next_command} => aut.cseq_rule(command, next_command),
+        Cmd::While{boolExp, cmd} => aut.while_rule(boolExp, cmd),
         _ => unreachable!(),
     }
     aut
@@ -515,6 +529,7 @@ pub fn eval_kw_aut(keyword: KW,mut aut: PiAut) -> PiAut{
         KW::KWLt => aut.lt_kw_rule(),
         KW::KWLe => aut.le_kw_rule(),
         KW::KWAss => aut.assign_kw_rule(),
+        KW::KWLoop => aut.while_kw_rule(),
         _ => unreachable!(),
     }
     aut
