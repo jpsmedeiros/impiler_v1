@@ -26,12 +26,12 @@ iop = _{ greater_equal | less_equal | greater_than | less_than  }
 neg   = { "~" }
 
 exp = _{ bexp | aexp }
-aexp = { aterm ~ !(boolop) ~ (arithop ~ aterm)* }
+aexp = { aterm ~ !(boolop) ~ (arithop ~ aterm)* | aterm }
 
 bexp = { bterm ~ (boolop ~ bterm)* | aexp ~ iop ~ aexp }
 
 aterm = _{ num | "(" ~ aexp ~ ")" | id}
-bterm = _{ boolean | "(" ~ bexp ~ ")" | neg ~ bterm | !(id ~ arithop) ~ id }
+bterm = _{ boolean | "(" ~ bexp ~ ")" | neg ~ bterm | !(id ~ arithop | id ~ iop) ~ id }
 
 identifier_char = _{ 'a'..'z' | 'A'..'Z' | '0'..'9' | "_" }
 id      =  {
