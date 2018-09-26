@@ -513,7 +513,7 @@ pub fn eval_command(command: Cmd, mut aut: PiAut) -> PiAut{
     match command{
         Cmd::Assign{id,value} => aut.assign_rule(id,value),
         Cmd::CSeq{command, next_command} => aut.cseq_rule(command, next_command),
-        Cmd::While{boolExp, cmd} => aut.while_rule(command),
+        //Cmd::While{boolExp, cmd} => aut.while_rule(command),
         _ => unreachable!(),
     }
     aut
