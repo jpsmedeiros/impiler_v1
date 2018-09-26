@@ -31,7 +31,7 @@ aexp = { aterm ~ !(boolop) ~ (arithop ~ aterm)* }
 bexp = { bterm ~ (boolop ~ bterm)* | aexp ~ iop ~ aexp }
 
 aterm = _{ num | "(" ~ aexp ~ ")" | id}
-bterm = _{ boolean | "(" ~ bexp ~ ")" | neg ~ bterm | id }
+bterm = _{ boolean | "(" ~ bexp ~ ")" | neg ~ bterm | !(id ~ arithop) ~ id }
 
 identifier_char = _{ 'a'..'z' | 'A'..'Z' | '0'..'9' | "_" }
 id      =  {
