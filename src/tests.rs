@@ -172,6 +172,25 @@ fn test_aut_assign_2() {
     assert_eq!(result, expected);
 }
 
+#[test]
+fn test_aut_assign_3() {
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    let result = parser::get_aut(parser::parse_input("x := true".to_owned()));
+    aut.store.insert("x".to_owned(), *piinterpreter::boolExp_as_exp(boolean(true)));
+    let expected = aut;
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_aut_assign_4() {
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    let result = parser::get_aut(parser::parse_input("x := ~true".to_owned()));
+    aut.store.insert("x".to_owned(), *piinterpreter::boolExp_as_exp(boolean(false)));
+    let expected = aut;
+    assert_eq!(result, expected);
+}
+
+
 
 pub fn boolean(value: bool) -> Box<piinterpreter::BoolExp>{
     piinterpreter::boolean(value)
