@@ -190,6 +190,25 @@ fn test_aut_assign_4() {
     assert_eq!(result, expected);
 }
 
+#[test]
+fn test_aut_while_1() {
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    let result = parser::get_aut(parser::parse_input("x := 0; while(x < 2) do { x := x + 1 }".to_owned()));
+    aut.store.insert("x".to_owned(), *piinterpreter::arithExp_as_exp(num(2.0)));
+    let expected = aut;
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_aut_while_2() {
+    let mut aut: piinterpreter::PiAut = piinterpreter::PiAut::new();
+    let result = parser::get_aut(parser::parse_input("factorial := 5; i := 1; value := 1; while(i <= factorial) do { value := value * i; i := i + 1 }".to_owned()));
+    aut.store.insert("i".to_owned(), *piinterpreter::arithExp_as_exp(num(6.0)));
+    aut.store.insert("factorial".to_owned(), *piinterpreter::arithExp_as_exp(num(5.0)));
+    aut.store.insert("value".to_owned(), *piinterpreter::arithExp_as_exp(num(120.0)));
+    let expected = aut;
+    assert_eq!(result, expected);
+}
 
 
 pub fn boolean(value: bool) -> Box<piinterpreter::BoolExp>{
