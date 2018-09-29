@@ -475,7 +475,10 @@ impl PiAut{
         if(value){
             self.push_ctrl(statement_as_ctrl_stack_type(wloop));
             match *cp{
-                Statement::Cmd(cmd) => self.push_ctrl(statement_as_ctrl_stack_type(cmd_as_statement(Box::new(cmd)))),
+                Statement::Cmd(cmd) => match cmd {
+                    Cmd::While{boolExp, cmd} => self.push_ctrl(statement_as_ctrl_stack_type(cmd_as_statement(cmd))),
+                    _ => unreachable!(),
+                },
                 _ => unreachable!(),
             }
         }
@@ -524,7 +527,6 @@ pub fn eval_exp_aut(expression: Exp,mut aut: PiAut) -> PiAut{
 }
 
 pub fn eval_command(command: Cmd, mut aut: PiAut) -> PiAut{
-    println!("CMD = {:?}", command);
     match command{
         Cmd::Assign{id,value} => aut.assign_rule(id,value),
         Cmd::CSeq{command, next_command} => aut.cseq_rule(command, next_command),
