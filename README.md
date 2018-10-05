@@ -17,3 +17,16 @@ n' ``` feche o VS Code e tente novamente.
 * 1- Use o Cargo para compilar e executar o código.   
   * 1.1 - ```cargo build```: Recupera dependências e compila o código gerando um .exe.  
   * 1.2 - ```cargo run```: compila e executa o código.  
+
+### Rodando o código pelo docker
+* 1- Instalar o docker  
+  https://docs.docker.com/
+* 2- Abrir o Docker Quick Start Terminal
+* 3- Docker funcionando ?  
+    ```docker info``` 
+
+* 4- Construir a imagem do docker  
+    ```docker build -t impiler .```
+
+* 5- Rodar o projeto  
+    ```docker run -it impiler```  
